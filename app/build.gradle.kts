@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.a2025frontcapstone"
+    namespace = "com.example.frontcapstone2025"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.a2025frontcapstone"
+        applicationId = "com.example.frontcapstone2025"
         minSdk = 34
         targetSdk = 35
         versionCode = 1
@@ -56,4 +56,15 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //viewModel : "androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2"
+    implementation( libs.androidx.lifecycle.viewmodel.compose)
+
+    //navigate : androidx.navigation:navigation-compose:2.8.3
+    implementation(libs.androidx.navigation.compose)
+
+    //google icon "androidx.compose.material:material-icons-extended:1.6.6"
+    implementation("androidx.compose.material:material-icons-extended:1.6.6")
+
+
 }
