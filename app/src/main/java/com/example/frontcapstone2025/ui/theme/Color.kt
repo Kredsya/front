@@ -15,3 +15,6 @@ val BottomBarBackground = Color(0xFFFDFBF8)
 val TextColorGray = Color(0xFF4C4E51)
 val BottomBarIconColor = Color(0xFF56575A)
 val BottomBarClickedIconColor = Color(0xFF66976C)
+
+val LoadingTrackColor = Color(0xFFB5C2AF)
+val DivideLineColor = Color(0xFF6A885F)

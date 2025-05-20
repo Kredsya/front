@@ -3,6 +3,7 @@ package com.example.frontcapstone2025.components.items
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.IconButton
@@ -25,13 +26,14 @@ fun BottomBarIcon(
     Column(
         modifier = Modifier
             .clickable(onClick = onClicked)
+            .fillMaxHeight()
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         IconButton(
             modifier = Modifier.size(60.dp),
-            onClick = { }
+            onClick = { onClicked() }
         ) {
             androidx.compose.material3.Icon(
                 modifier = modifier.size(50.dp),
