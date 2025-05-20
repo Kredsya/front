@@ -41,7 +41,7 @@ fun CustomButton(
             .shadow(6.dp, RoundedCornerShape(16.dp))
     ) {
         Text(
-            text = "스캔 시작",
+            text = text,
             style = TextStyle(
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp
