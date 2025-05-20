@@ -13,7 +13,10 @@ import com.example.frontcapstone2025.components.layout.BottomMenu
 import com.example.frontcapstone2025.components.layout.MainPageTopBar
 
 @Composable
-fun SearchWifiPage(bottomBaronClickedActions: List<() -> Unit>) {
+fun SearchWifiPage(
+    bottomBaronClickedActions: List<() -> Unit>,
+    moveToGetArmLengthPage: () -> Unit
+) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -33,7 +36,7 @@ fun SearchWifiPage(bottomBaronClickedActions: List<() -> Unit>) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CustomButton(text = "카메라 위치 찾기", onClicked = { })
+            CustomButton(text = "카메라 위치 찾기", onClicked = moveToGetArmLengthPage)
         }
     }
 }

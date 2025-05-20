@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.frontcapstone2025.presentation.screen.GetArmLengthPage
 import com.example.frontcapstone2025.presentation.screen.LoadingPage
 import com.example.frontcapstone2025.presentation.screen.MainPage
 import com.example.frontcapstone2025.presentation.screen.SearchWifiPage
@@ -46,9 +47,15 @@ fun Navigator() {
                 SettingPage(bottomBaronClickedActions = bottomBaronClickedActions)
             }
             composable(route = "SearchWifiPage") {
-                SearchWifiPage(bottomBaronClickedActions = bottomBaronClickedActions)
+                SearchWifiPage(
+                    bottomBaronClickedActions = bottomBaronClickedActions,
+                    moveToGetArmLengthPage = { navController.navigate("GetArmLengthPage") }
+                )
             }
 
+            composable(route = "GetArmLengthPage") {
+                GetArmLengthPage(navigationBack = navigationBack)
+            }
 
             composable(route = "LoadingPage") {
                 LoadingPage(text = "주변 네트워크를 검색하고 있어요.\n대략 30~40초 정도 걸려요.")
