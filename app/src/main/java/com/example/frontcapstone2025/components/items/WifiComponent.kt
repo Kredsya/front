@@ -75,34 +75,36 @@ fun WifiComponent(
         }
 
         // '찾기' 버튼
-        if (showFindButtonOrNot) {
-            Button(
-                onClick = onSearchClicked, // 클릭 동작도 연결
-                shape = RoundedCornerShape(4.dp),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 2.dp,
-                    pressedElevation = 3.dp,
-                    disabledElevation = 0.dp
-                ),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = TextColorGray
-                ),
-                modifier = Modifier
-                    .width(56.dp)
-                    .height(32.dp),
-                contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
-            ) {
-                Text(
-                    text = "찾기",
-                    style = TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    ),
-                )
-            }
-        }
+        Button(
+            onClick = {
+                if (showFindButtonOrNot) onSearchClicked()
+            }, // 클릭 동작도 연결
+            shape = RoundedCornerShape(4.dp),
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 3.dp,
+                disabledElevation = 0.dp
+            ),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (showFindButtonOrNot) Color.White else Color.Gray, // ✅ 색상 조건 분기
+                contentColor = TextColorGray
+            ),
+            modifier = Modifier
+                .width(56.dp)
+                .height(32.dp),
+            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
 
+            ) {
+            Text(
+                text = "찾기",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                ),
+            )
+        }
     }
+
+
 }
 
