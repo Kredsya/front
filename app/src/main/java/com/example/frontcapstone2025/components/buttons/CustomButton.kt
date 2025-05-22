@@ -24,7 +24,9 @@ fun CustomButton(
     enabled: Boolean = true
 ) {
     Button(
-        onClick = onClicked,
+        onClick = {
+            if (enabled) onClicked()
+        },
         shape = RoundedCornerShape(16.dp),
         elevation = ButtonDefaults.buttonElevation(
             defaultElevation = 6.dp,
@@ -32,14 +34,14 @@ fun CustomButton(
             disabledElevation = 0.dp
         ),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White,
+            containerColor = if (enabled) Color.White else Color.Gray, // ✅ 색상 조건 분기
             contentColor = TextColorGray
         ),
         modifier = Modifier
             .padding(32.dp)
             .fillMaxWidth()
             .height(80.dp)
-            .shadow(6.dp, RoundedCornerShape(16.dp))
+            .shadow(6.dp, RoundedCornerShape(16.dp)),
     ) {
         Text(
             text = text,
