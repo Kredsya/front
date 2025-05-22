@@ -20,7 +20,8 @@ import com.example.frontcapstone2025.ui.theme.TextColorGray
 @Composable
 fun CustomButton(
     text: String,
-    onClicked: () -> Unit
+    onClicked: () -> Unit,
+    enabled: Boolean = true
 ) {
     Button(
         onClick = onClicked,

@@ -28,6 +28,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.frontcapstone2025.R
+import com.example.frontcapstone2025.components.buttons.CustomButton
 import com.example.frontcapstone2025.components.layout.TopBarWithBack
 import com.example.frontcapstone2025.ui.theme.TextColorGray
 
@@ -54,7 +55,7 @@ fun GetAllDistancePage(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
             Box(
@@ -62,6 +63,7 @@ fun GetAllDistancePage(
                     .fillMaxWidth()
                     .background(Color(0xFFB4C5AB))
                     .padding(16.dp)
+                    .padding(horizontal = 8.dp)
             ) {
                 Column {
                     Text(
@@ -207,7 +209,11 @@ fun GetAllDistancePage(
                 }
             }
 
-
+            CustomButton(
+                text = "거리 측정 완료",
+                onClicked = {},
+                enabled = false
+            )
         }
 
 
