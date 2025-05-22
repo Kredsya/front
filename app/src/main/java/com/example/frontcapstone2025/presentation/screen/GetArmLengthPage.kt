@@ -31,14 +31,21 @@ import com.example.frontcapstone2025.ui.theme.TextColorGray
 @Composable
 fun GetArmLengthPage(
     navigationBack: () -> Unit,
-    moveToGetAllDistancePage: () -> Unit
-) {
+    moveToGetAllDistancePage: () -> Unit,
+    pinnedWifiName: String,
+
+    ) {
     var armLength by rememberSaveable { mutableStateOf("") }
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        topBar = { TopBarWithBack(navigationBack = navigationBack) },
+        topBar = {
+            TopBarWithBack(
+                navigationBack = navigationBack,
+                pinnedWifiName = pinnedWifiName
+            )
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier

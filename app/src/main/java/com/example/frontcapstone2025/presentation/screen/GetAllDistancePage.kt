@@ -33,12 +33,19 @@ import com.example.frontcapstone2025.ui.theme.TextColorGray
 
 @Composable
 fun GetAllDistancePage(
-    navigationBack: () -> Unit
+    navigationBack: () -> Unit,
+    navToOneDistancePage: List<() -> Unit>,
+    pinnedWifiName: String,
 ) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        topBar = { TopBarWithBack(navigationBack = navigationBack) },
+        topBar = {
+            TopBarWithBack(
+                navigationBack = navigationBack,
+                pinnedWifiName = pinnedWifiName
+            )
+        },
 
         ) { innerPadding ->
         Column(
@@ -127,7 +134,7 @@ fun GetAllDistancePage(
                         contentDescription = null,
                         modifier = Modifier
                             .height(196.dp)
-                            .clickable { }
+                            .clickable { navToOneDistancePage[0]() }
                     )
                     Text(
                         text = "측정: O",
@@ -144,7 +151,7 @@ fun GetAllDistancePage(
                         contentDescription = null,
                         modifier = Modifier
                             .height(196.dp)
-                            .clickable { }
+                            .clickable { navToOneDistancePage[1]() }
                     )
                     Text(
                         text = "측정: X",
@@ -170,7 +177,7 @@ fun GetAllDistancePage(
                         contentDescription = null,
                         modifier = Modifier
                             .height(196.dp)
-                            .clickable { }
+                            .clickable { navToOneDistancePage[2]() }
                     )
                     Text(
                         text = "측정: O",
@@ -187,7 +194,7 @@ fun GetAllDistancePage(
                         contentDescription = null,
                         modifier = Modifier
                             .height(196.dp)
-                            .clickable { }
+                            .clickable { navToOneDistancePage[3]() }
                     )
                     Text(
                         text = "측정: X",

@@ -26,7 +26,8 @@ import com.example.frontcapstone2025.ui.theme.TextColorGray
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBarWithBack(
-    navigationBack: () -> Unit
+    navigationBack: () -> Unit,
+    pinnedWifiName: String,
 ) {
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
@@ -70,7 +71,7 @@ fun TopBarWithBack(
                     )
                 }
                 Text(
-                    text = "iptime",
+                    text = pinnedWifiName,
                     color = TextColorGray,
                     fontSize = 24.sp,
                     modifier = Modifier.fillMaxWidth(0.8f)

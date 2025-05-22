@@ -22,14 +22,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.frontcapstone2025.ui.theme.TextColorGray
 
 @Composable
-@Preview(showBackground = true)
-fun WifiComponent() {
+fun WifiComponent(
+    onSearchClicked: () -> Unit,
+    name: String,
+    showFindButtonOrNot: Boolean = false
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -49,7 +51,7 @@ fun WifiComponent() {
 
         // SSID 텍스트
         Text(
-            text = "iptime1717",
+            text = name,
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
             color = TextColorGray
@@ -73,31 +75,34 @@ fun WifiComponent() {
         }
 
         // '찾기' 버튼
-        Button(
-            onClick = { },
-            shape = RoundedCornerShape(4.dp),
-            elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = 2.dp,
-                pressedElevation = 3.dp,
-                disabledElevation = 0.dp
-            ),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = TextColorGray
-            ),
-            modifier = Modifier
-                .width(56.dp)
-                .height(32.dp),
-            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
-        ) {
-            Text(
-                text = "찾기",
-                style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
+        if (showFindButtonOrNot) {
+            Button(
+                onClick = onSearchClicked, // 클릭 동작도 연결
+                shape = RoundedCornerShape(4.dp),
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 2.dp,
+                    pressedElevation = 3.dp,
+                    disabledElevation = 0.dp
                 ),
-            )
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = TextColorGray
+                ),
+                modifier = Modifier
+                    .width(56.dp)
+                    .height(32.dp),
+                contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+            ) {
+                Text(
+                    text = "찾기",
+                    style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    ),
+                )
+            }
         }
+
     }
 }
 

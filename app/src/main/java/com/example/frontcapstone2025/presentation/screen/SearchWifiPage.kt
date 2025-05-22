@@ -15,12 +15,17 @@ import com.example.frontcapstone2025.components.layout.MainPageTopBar
 @Composable
 fun SearchWifiPage(
     bottomBaronClickedActions: List<() -> Unit>,
-    moveToGetArmLengthPage: () -> Unit
+    moveToGetArmLengthPage: () -> Unit,
+    pinnedWifiName: String = "",
 ) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        topBar = { MainPageTopBar() },
+        topBar = {
+            MainPageTopBar(
+                pinnedWifiName = pinnedWifiName
+            )
+        },
         bottomBar = {
             BottomMenu(
                 bottomBaronClickedActions = bottomBaronClickedActions,

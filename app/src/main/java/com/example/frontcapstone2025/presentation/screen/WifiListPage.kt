@@ -27,11 +27,17 @@ import com.example.frontcapstone2025.ui.theme.TextColorGray
 @Composable
 fun WifiListPage(
     bottomBaronClickedActions: List<() -> Unit>,
-    moveToFirstMainPage: () -> Unit
+    moveToFirstMainPage: () -> Unit,
+    pinnedWifiName: String,
+    setPinnedWifiName: (String) -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { MainPageTopBar() },
+        topBar = {
+            MainPageTopBar(
+                pinnedWifiName = pinnedWifiName
+            )
+        },
         bottomBar = {
             BottomMenu(
                 bottomBaronClickedActions = bottomBaronClickedActions,
@@ -68,8 +74,18 @@ fun WifiListPage(
                             .padding(horizontal = 8.dp)
                             .padding(vertical = 8.dp)
                     ) {
-                        WifiComponent()
-                        WifiComponent()
+                        WifiComponent(
+                            onSearchClicked = { setPinnedWifiName("iptime 722") },
+                            name = "iptime 722",
+                            showFindButtonOrNot = true
+
+                        )
+                        WifiComponent(
+                            onSearchClicked = { setPinnedWifiName("U+123974yyo123") },
+                            name = "U+123974yyo123",
+                            showFindButtonOrNot = true
+
+                        )
                     }
                 }
 
@@ -94,10 +110,29 @@ fun WifiListPage(
                             .padding(horizontal = 8.dp)
                             .padding(vertical = 8.dp)
                     ) {
-                        WifiComponent()
-                        WifiComponent()
-                        WifiComponent()
-                        WifiComponent()
+                        WifiComponent(
+                            onSearchClicked = { setPinnedWifiName("KT+5G") },
+                            name = "KT+5G",
+                            showFindButtonOrNot = false
+                        )
+                        WifiComponent(
+                            onSearchClicked = { setPinnedWifiName("iptime 722") },
+                            name = "KT2.4G",
+                            showFindButtonOrNot = false
+
+                        )
+                        WifiComponent(
+                            onSearchClicked = { setPinnedWifiName("U+123974yyo123") },
+                            name = "U+123974yyo123",
+                            showFindButtonOrNot = false
+
+                        )
+                        WifiComponent(
+                            onSearchClicked = { setPinnedWifiName("U+123974yyo123") },
+                            name = "U+123974yyo123",
+                            showFindButtonOrNot = false
+
+                        )
                     }
                 }
             }

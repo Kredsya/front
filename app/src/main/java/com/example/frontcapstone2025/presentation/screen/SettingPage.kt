@@ -35,12 +35,19 @@ import com.example.frontcapstone2025.ui.theme.DivideLineColor
 import com.example.frontcapstone2025.ui.theme.TextColorGray
 
 @Composable
-fun SettingPage(bottomBaronClickedActions: List<() -> Unit>) {
+fun SettingPage(
+    bottomBaronClickedActions: List<() -> Unit>,
+    pinnedWifiName: String,
+) {
     var locationPermission by rememberSaveable { mutableStateOf(true) }
     var storagePermission by rememberSaveable { mutableStateOf(true) }
 
     Scaffold(
-        topBar = { MainPageTopBar() },
+        topBar = {
+            MainPageTopBar(
+                pinnedWifiName = pinnedWifiName
+            )
+        },
         bottomBar = {
             BottomMenu(
                 bottomBaronClickedActions = bottomBaronClickedActions,

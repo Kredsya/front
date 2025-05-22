@@ -17,12 +17,17 @@ import com.example.frontcapstone2025.components.layout.MainPageTopBar
 @Composable
 fun MainPage(
     bottomBaronClickedActions: List<() -> Unit>,
-    moveToLoadingPage: () -> Unit
+    moveToLoadingPage: () -> Unit,
+    pinnedWifiName: String = "",
 ) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        topBar = { MainPageTopBar() },
+        topBar = {
+            MainPageTopBar(
+                pinnedWifiName = pinnedWifiName
+            )
+        },
         bottomBar = {
             BottomMenu(
                 bottomBaronClickedActions = bottomBaronClickedActions,

@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.frontcapstone2025.ui.theme.BottomBarIconColor
@@ -25,8 +24,9 @@ import com.example.frontcapstone2025.ui.theme.TextColorGray
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
-fun MainPageTopBar() {
+fun MainPageTopBar(
+    pinnedWifiName: String = "",
+) {
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
         title = {
@@ -60,7 +60,7 @@ fun MainPageTopBar() {
                     )
                 }
                 Text(
-                    text = "iptime",
+                    text = pinnedWifiName,
                     color = TextColorGray,
                     fontSize = 24.sp,
                     modifier = Modifier.fillMaxWidth(0.8f)

@@ -12,8 +12,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.frontcapstone2025.R
 import com.example.frontcapstone2025.presentation.screen.GetAllDistancePage
 import com.example.frontcapstone2025.presentation.screen.GetArmLengthPage
+import com.example.frontcapstone2025.presentation.screen.GetOneDistancePage
 import com.example.frontcapstone2025.presentation.screen.LoadingPage
 import com.example.frontcapstone2025.presentation.screen.MainPage
 import com.example.frontcapstone2025.presentation.screen.SearchWifiPage
@@ -40,10 +42,13 @@ fun Navigator() {
         { navivationWithClear(navController = navController, route = "SettingPage") },
     )
 
+    var pinnedWifiName by rememberSaveable { mutableStateOf("") }
+
+
     Scaffold { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "GetAllDistancePage",
+            startDestination = "MainPage",
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = "MainPage") {
@@ -52,16 +57,21 @@ fun Navigator() {
                     moveToLoadingPage = {
                         navController.navigate("LoadingPage")
                         centerButtonTarget = "WifiListPage"
-                    }
+                    },
+                    pinnedWifiName = pinnedWifiName
                 )
             }
             composable(route = "SettingPage") {
-                SettingPage(bottomBaronClickedActions = bottomBaronClickedActions)
+                SettingPage(
+                    bottomBaronClickedActions = bottomBaronClickedActions,
+                    pinnedWifiName = pinnedWifiName
+                )
             }
             composable(route = "SearchWifiPage") {
                 SearchWifiPage(
                     bottomBaronClickedActions = bottomBaronClickedActions,
-                    moveToGetArmLengthPage = { navController.navigate("GetArmLengthPage") }
+                    moveToGetArmLengthPage = { navController.navigate("GetArmLengthPage") },
+                    pinnedWifiName = pinnedWifiName
                 )
             }
 
@@ -71,18 +81,68 @@ fun Navigator() {
                     moveToFirstMainPage = {
                         centerButtonTarget = "MainPage"
                         navController.navigate("MainPage")
-                    }
+                    },
+                    pinnedWifiName = pinnedWifiName,
+                    setPinnedWifiName = { pinnedWifiName = it }
                 )
             }
 
             composable(route = "GetArmLengthPage") {
                 GetArmLengthPage(
                     navigationBack = navigationBack,
-                    moveToGetAllDistancePage = { navController.navigate("GetAllDistancePage") }
+                    moveToGetAllDistancePage = { navController.navigate("GetAllDistancePage") },
+                    pinnedWifiName = pinnedWifiName
                 )
             }
             composable(route = "GetAllDistancePage") {
-                GetAllDistancePage(navigationBack = navigationBack)
+                GetAllDistancePage(
+                    navigationBack = navigationBack,
+                    navToOneDistancePage = listOf(
+                        { navController.navigate("GetUpDistancePage") },
+                        { navController.navigate("GetDownDistancePage") },
+                        { navController.navigate("GetLeftDistancePage") },
+                        { navController.navigate("GetFrontDistancePage") },
+                    ),
+                    pinnedWifiName = pinnedWifiName
+                )
+            }
+
+
+            composable(route = "GetUpDistancePage") {
+                GetOneDistancePage(
+                    navigationBack = { navController.navigateUp() },
+                    distance = "1.99m",
+                    imageResId = R.drawable.up,
+                    pinnedWifiName = pinnedWifiName
+
+                )
+            }
+            composable(route = "GetDownDistancePage") {
+                GetOneDistancePage(
+                    navigationBack = { navController.navigateUp() },
+                    distance = "1.23m",
+                    imageResId = R.drawable.down,
+                    pinnedWifiName = pinnedWifiName
+
+                )
+            }
+            composable(route = "GetLeftDistancePage") {
+                GetOneDistancePage(
+                    navigationBack = { navController.navigateUp() },
+                    distance = "1.213m",
+                    imageResId = R.drawable.left,
+                    pinnedWifiName = pinnedWifiName
+
+                )
+            }
+            composable(route = "GetFrontDistancePage") {
+                GetOneDistancePage(
+                    navigationBack = { navController.navigateUp() },
+                    distance = "2m",
+                    imageResId = R.drawable.front,
+                    pinnedWifiName = pinnedWifiName
+
+                )
             }
 
             composable(route = "LoadingPage") {
