@@ -38,6 +38,7 @@ import com.example.frontcapstone2025.ui.theme.TextColorGray
 fun SettingPage(
     bottomBaronClickedActions: List<() -> Unit>,
     pinnedWifiName: String,
+    navToHelpPage: () -> Unit
 ) {
     var locationPermission by rememberSaveable { mutableStateOf(true) }
     var storagePermission by rememberSaveable { mutableStateOf(true) }
@@ -45,7 +46,8 @@ fun SettingPage(
     Scaffold(
         topBar = {
             MainPageTopBar(
-                pinnedWifiName = pinnedWifiName
+                pinnedWifiName = pinnedWifiName,
+                navToHelpPage = navToHelpPage
             )
         },
         bottomBar = {

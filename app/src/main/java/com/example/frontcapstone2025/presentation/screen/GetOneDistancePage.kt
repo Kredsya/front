@@ -25,15 +25,16 @@ fun GetOneDistancePage(
     distance: String,
     @DrawableRes imageResId: Int,
     pinnedWifiName: String,
-
-    ) {
+    navToHelpPage: () -> Unit
+) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
         topBar = {
             TopBarWithBack(
                 navigationBack = navigationBack,
-                pinnedWifiName = pinnedWifiName
+                pinnedWifiName = pinnedWifiName,
+                navToHelpPage = navToHelpPage
             )
         },
 

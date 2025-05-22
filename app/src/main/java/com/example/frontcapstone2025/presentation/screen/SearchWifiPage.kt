@@ -17,13 +17,15 @@ fun SearchWifiPage(
     bottomBaronClickedActions: List<() -> Unit>,
     moveToGetArmLengthPage: () -> Unit,
     pinnedWifiName: String = "",
+    navToHelpPage: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
         topBar = {
             MainPageTopBar(
-                pinnedWifiName = pinnedWifiName
+                pinnedWifiName = pinnedWifiName,
+                navToHelpPage = navToHelpPage
             )
         },
         bottomBar = {

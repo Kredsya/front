@@ -19,13 +19,15 @@ fun MainPage(
     bottomBaronClickedActions: List<() -> Unit>,
     moveToLoadingPage: () -> Unit,
     pinnedWifiName: String = "",
+    navToHelpPage: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
         topBar = {
             MainPageTopBar(
-                pinnedWifiName = pinnedWifiName
+                pinnedWifiName = pinnedWifiName,
+                navToHelpPage = navToHelpPage
             )
         },
         bottomBar = {

@@ -36,6 +36,7 @@ fun GetAllDistancePage(
     navigationBack: () -> Unit,
     navToOneDistancePage: List<() -> Unit>,
     pinnedWifiName: String,
+    navToHelpPage: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier
@@ -43,7 +44,8 @@ fun GetAllDistancePage(
         topBar = {
             TopBarWithBack(
                 navigationBack = navigationBack,
-                pinnedWifiName = pinnedWifiName
+                pinnedWifiName = pinnedWifiName,
+                navToHelpPage = navToHelpPage
             )
         },
 

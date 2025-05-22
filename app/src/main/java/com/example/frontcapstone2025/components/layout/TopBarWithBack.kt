@@ -28,6 +28,7 @@ import com.example.frontcapstone2025.ui.theme.TextColorGray
 fun TopBarWithBack(
     navigationBack: () -> Unit,
     pinnedWifiName: String,
+    navToHelpPage: () -> Unit
 ) {
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
@@ -61,7 +62,7 @@ fun TopBarWithBack(
                     modifier = Modifier
                         .size(48.dp)
                         .fillMaxWidth(0.1f),
-                    onClick = { }
+                    onClick = { navToHelpPage() }
                 ) {
                     androidx.compose.material3.Icon(
                         modifier = Modifier.size(34.dp),

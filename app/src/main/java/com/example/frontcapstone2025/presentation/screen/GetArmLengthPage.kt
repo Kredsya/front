@@ -33,8 +33,8 @@ fun GetArmLengthPage(
     navigationBack: () -> Unit,
     moveToGetAllDistancePage: () -> Unit,
     pinnedWifiName: String,
-
-    ) {
+    navToHelpPage: () -> Unit
+) {
     var armLength by rememberSaveable { mutableStateOf("") }
 
     Scaffold(
@@ -43,7 +43,8 @@ fun GetArmLengthPage(
         topBar = {
             TopBarWithBack(
                 navigationBack = navigationBack,
-                pinnedWifiName = pinnedWifiName
+                pinnedWifiName = pinnedWifiName,
+                navToHelpPage = navToHelpPage
             )
         },
     ) { innerPadding ->

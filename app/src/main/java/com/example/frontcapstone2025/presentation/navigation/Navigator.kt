@@ -1,5 +1,6 @@
 package com.example.frontcapstone2025.presentation.navigation
 
+import HelpPage
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -58,20 +59,26 @@ fun Navigator() {
                         navController.navigate("LoadingPage")
                         centerButtonTarget = "WifiListPage"
                     },
-                    pinnedWifiName = pinnedWifiName
+                    pinnedWifiName = pinnedWifiName,
+                    navToHelpPage = { navController.navigate("HelpPage") }
+
                 )
             }
             composable(route = "SettingPage") {
                 SettingPage(
                     bottomBaronClickedActions = bottomBaronClickedActions,
-                    pinnedWifiName = pinnedWifiName
+                    pinnedWifiName = pinnedWifiName,
+                    navToHelpPage = { navController.navigate("HelpPage") }
+
                 )
             }
             composable(route = "SearchWifiPage") {
                 SearchWifiPage(
                     bottomBaronClickedActions = bottomBaronClickedActions,
                     moveToGetArmLengthPage = { navController.navigate("GetArmLengthPage") },
-                    pinnedWifiName = pinnedWifiName
+                    pinnedWifiName = pinnedWifiName,
+                    navToHelpPage = { navController.navigate("HelpPage") }
+
                 )
             }
 
@@ -83,7 +90,9 @@ fun Navigator() {
                         navController.navigate("MainPage")
                     },
                     pinnedWifiName = pinnedWifiName,
-                    setPinnedWifiName = { pinnedWifiName = it }
+                    setPinnedWifiName = { pinnedWifiName = it },
+                    navToHelpPage = { navController.navigate("HelpPage") }
+
                 )
             }
 
@@ -91,7 +100,9 @@ fun Navigator() {
                 GetArmLengthPage(
                     navigationBack = navigationBack,
                     moveToGetAllDistancePage = { navController.navigate("GetAllDistancePage") },
-                    pinnedWifiName = pinnedWifiName
+                    pinnedWifiName = pinnedWifiName,
+                    navToHelpPage = { navController.navigate("HelpPage") }
+
                 )
             }
             composable(route = "GetAllDistancePage") {
@@ -103,7 +114,9 @@ fun Navigator() {
                         { navController.navigate("GetLeftDistancePage") },
                         { navController.navigate("GetFrontDistancePage") },
                     ),
-                    pinnedWifiName = pinnedWifiName
+                    pinnedWifiName = pinnedWifiName,
+                    navToHelpPage = { navController.navigate("HelpPage") }
+
                 )
             }
 
@@ -113,7 +126,8 @@ fun Navigator() {
                     navigationBack = { navController.navigateUp() },
                     distance = "1.99m",
                     imageResId = R.drawable.up,
-                    pinnedWifiName = pinnedWifiName
+                    pinnedWifiName = pinnedWifiName,
+                    navToHelpPage = { navController.navigate("HelpPage") }
 
                 )
             }
@@ -122,7 +136,8 @@ fun Navigator() {
                     navigationBack = { navController.navigateUp() },
                     distance = "1.23m",
                     imageResId = R.drawable.down,
-                    pinnedWifiName = pinnedWifiName
+                    pinnedWifiName = pinnedWifiName,
+                    navToHelpPage = { navController.navigate("HelpPage") }
 
                 )
             }
@@ -131,7 +146,8 @@ fun Navigator() {
                     navigationBack = { navController.navigateUp() },
                     distance = "1.213m",
                     imageResId = R.drawable.left,
-                    pinnedWifiName = pinnedWifiName
+                    pinnedWifiName = pinnedWifiName,
+                    navToHelpPage = { navController.navigate("HelpPage") }
 
                 )
             }
@@ -140,8 +156,8 @@ fun Navigator() {
                     navigationBack = { navController.navigateUp() },
                     distance = "2m",
                     imageResId = R.drawable.front,
-                    pinnedWifiName = pinnedWifiName
-
+                    pinnedWifiName = pinnedWifiName,
+                    navToHelpPage = { navController.navigate("HelpPage") }
                 )
             }
 
@@ -150,6 +166,9 @@ fun Navigator() {
                     text = "주변 네트워크를 검색하고 있어요.\n대략 30~40초 정도 걸려요.",
                     navController = navController
                 )
+            }
+            composable(route = "HelpPage") {
+                HelpPage(navigationBack = navigationBack)
             }
         }
     }
