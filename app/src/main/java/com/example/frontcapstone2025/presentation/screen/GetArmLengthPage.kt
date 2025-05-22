@@ -30,7 +30,8 @@ import com.example.frontcapstone2025.ui.theme.TextColorGray
 
 @Composable
 fun GetArmLengthPage(
-    navigationBack: () -> Unit
+    navigationBack: () -> Unit,
+    moveToGetAllDistancePage: () -> Unit
 ) {
     var armLength by rememberSaveable { mutableStateOf("") }
 
@@ -71,6 +72,7 @@ fun GetArmLengthPage(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     keyboardActions = KeyboardActions(
                         onDone = {
+                            moveToGetAllDistancePage()
                         }
                     ),
                     colors = TextFieldDefaults.colors(
