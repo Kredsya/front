@@ -1,5 +1,7 @@
 package com.example.frontcapstone2025.components.items
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,10 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.frontcapstone2025.ui.theme.TextColorGray
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WifiComponent(
     onSearchClicked: () -> Unit,
@@ -53,6 +57,9 @@ fun WifiComponent(
         // SSID 텍스트
         Text(
             text = name,
+            modifier = Modifier.weight(1f).basicMarquee().padding(end = 2.dp),
+            maxLines = 1,
+            overflow = TextOverflow.Visible,
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
             color = TextColorGray
