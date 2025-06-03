@@ -45,6 +45,8 @@ fun Navigator() {
 
     var pinnedWifiName by rememberSaveable { mutableStateOf("") }
 
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+
 
     Scaffold { innerPadding ->
         NavHost(
@@ -77,7 +79,9 @@ fun Navigator() {
                     bottomBaronClickedActions = bottomBaronClickedActions,
                     moveToGetArmLengthPage = { navController.navigate("GetArmLengthPage") },
                     pinnedWifiName = pinnedWifiName,
-                    navToHelpPage = { navController.navigate("HelpPage") }
+                    navToHelpPage = { navController.navigate("HelpPage") },
+                    showDialog = showDialog,
+                    setShowDialog = { showDialog = it }
 
                 )
             }
@@ -170,6 +174,7 @@ fun Navigator() {
             composable(route = "HelpPage") {
                 HelpPage(navigationBack = navigationBack)
             }
+
         }
     }
 }

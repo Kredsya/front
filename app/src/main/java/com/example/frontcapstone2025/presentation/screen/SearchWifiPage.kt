@@ -17,7 +17,9 @@ fun SearchWifiPage(
     bottomBaronClickedActions: List<() -> Unit>,
     moveToGetArmLengthPage: () -> Unit,
     pinnedWifiName: String = "",
-    navToHelpPage: () -> Unit
+    navToHelpPage: () -> Unit,
+    showDialog: Boolean = false,
+    setShowDialog: (Boolean) -> Unit = {}
 ) {
     Scaffold(
         modifier = Modifier
@@ -45,5 +47,16 @@ fun SearchWifiPage(
         ) {
             CustomButton(text = "카메라 위치 찾기", onClicked = moveToGetArmLengthPage)
         }
+
+        if (showDialog) {
+            NotifyCameraLocationDialog(
+                x = 10.0,
+                y = 20.0,
+                z = 300.234,
+                meterChanged = false,
+                onCloseClicked = { setShowDialog(false) },
+            )
+        }
     }
+
 }
