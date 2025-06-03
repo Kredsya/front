@@ -216,7 +216,8 @@ private fun WifiBox(
                 list.forEach { info ->
                     WifiComponent(
                         onSearchClicked       = { setPinnedWifiName(info.ssid) },
-                        name                  = "${info.ssid}  (≈${info.distanceString})",
+                        name                  = info.ssid,
+                        distance              = info.distanceString,
                         showFindButtonOrNot   = showFindButton
                     )
                 }

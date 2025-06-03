@@ -30,6 +30,7 @@ import com.example.frontcapstone2025.ui.theme.TextColorGray
 fun WifiComponent(
     onSearchClicked: () -> Unit,
     name: String,
+    distance: String,
     showFindButtonOrNot: Boolean = false
 ) {
     Row(
@@ -67,7 +68,7 @@ fun WifiComponent(
             contentAlignment = Alignment.BottomEnd,
         ) {
             Text(
-                text = "5m",
+                text = distance,
                 fontSize = 16.sp,
                 color = TextColorGray,
                 modifier = Modifier.padding(end = 8.dp, bottom = 10.dp)
