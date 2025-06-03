@@ -313,4 +313,4 @@ private class WifiUkf(
 private const val RSSI_AT_1M       = -40      // [dBm] 1 m 기준
 private const val PATH_LOSS_EXPONENT = 3.0
 private const val WALL_LOSS_DB     = 1
-private const val MIN_RSSI         = -60
+private const val MIN_RSSI         = -80
