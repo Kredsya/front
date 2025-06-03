@@ -8,6 +8,10 @@ import com.example.frontcapstone2025.presentation.navigation.Navigator
 import com.example.frontcapstone2025.ui.theme._2025FrontCapstoneTheme
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        const val CAPTURE_STATUS_ACTION = "com.example.frontcapstone2025.CAPTURE_STATUS"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
