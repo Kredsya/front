@@ -109,6 +109,7 @@ fun WifiListPage(
     }
 
     /* 분류 */
+    // @todo: suspicious를 BE PCAP features에 던져서 가져오는 걸로 변경할 것. 지금은 가장 가까운 2개를 임의로 suspicious에 넣고 있음.
     val suspicious = wifiDistances.take(2)
     val others     = wifiDistances.drop(2)
 
