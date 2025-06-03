@@ -57,7 +57,7 @@ fun WifiComponent(
         // SSID 텍스트
         Text(
             text = name,
-            modifier = Modifier.weight(1f).basicMarquee().padding(end = 2.dp),
+            modifier = Modifier.weight(1f).basicMarquee().padding(end = 4.dp),
             maxLines = 1,
             overflow = TextOverflow.Visible,
             fontWeight = FontWeight.Bold,
@@ -70,7 +70,6 @@ fun WifiComponent(
         // 거리 텍스트만 하단 정렬
         Box(
             modifier = Modifier
-                .weight(1f)
                 .height(64.dp),
             contentAlignment = Alignment.BottomEnd,
         ) {
