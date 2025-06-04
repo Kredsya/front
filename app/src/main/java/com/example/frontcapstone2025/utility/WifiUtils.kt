@@ -1,0 +1,150 @@
+package com.example.frontcapstone2025.utility
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.wifi.ScanResult
+import android.net.wifi.WifiManager
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.delay
+import kotlin.math.pow
+import kotlin.math.sqrt
+import java.util.Locale
+
+/* -------------------------------------------------------------------------- */
+/* ----------------------------  데이터 & 계산  ----------------------------- */
+/* -------------------------------------------------------------------------- */
+
+data class WifiDisplay(
+    val ssid: String,
+    val distance: Double
+) {
+    val distanceString: String =
+        String.format(Locale.US, "%.2f m", distance)
+}
+
+fun List<ScanResult>.toDisplayList(
+    ukfMap: MutableMap<String, WifiUkf>
+): List<WifiDisplay> =
+    this
+        .filter { it.level >= MIN_RSSI }                       // 신호 필터링
+        .map { res ->
+            val raw  = rssiToDistance(res.level)
+            val ukf  = ukfMap.getOrPut(res.BSSID) { WifiUkf(initial = raw) }
+            val dist = ukf.update(raw)
+            WifiDisplay(res.SSID.ifBlank { res.BSSID }, dist)
+        }
+        .sortedBy { it.distance }
+
+/* ---------- RSSI → 거리 ---------- */
+fun rssiToDistance(rssi: Int, walls: Int = 1): Double {
+    val totalLoss = (RSSI_AT_1M - rssi) - (walls * WALL_LOSS_DB)
+    return 10.0.pow(totalLoss / (10 * PATH_LOSS_EXPONENT))
+}
+
+/* -------------------------------------------------------------------------- */
+/* ---------------------------  UKF 1-차원 구현  ---------------------------- */
+/* -------------------------------------------------------------------------- */
+
+class WifiUkf(
+    initial: Double,
+    private var P: Double = 1.0,
+    private val Q: Double = 0.1,
+    private val R: Double = 0.5
+) {
+    private var x = initial
+    private val alpha = 1e-3
+    private val kappa = 0.0
+    private val beta = 2.0
+
+    fun update(z: Double): Double {
+        /* ---------- 예측 ---------- */
+        val xPred = x
+        val PPred = P + Q
+
+        /* ---------- Σ-점 ---------- */
+        val n = 1
+        val lambda = alpha * alpha * (n + kappa) - n
+        val c = n + lambda
+        val sqrtTerm = kotlin.math.sqrt(c * PPred)
+        val sigma = doubleArrayOf(xPred, xPred + sqrtTerm, xPred - sqrtTerm)
+
+        val wm0 = lambda / c
+        val wc0 = wm0 + (1 - alpha * alpha + beta)
+        val wi = 1.0 / (2 * c)
+        val wm = doubleArrayOf(wm0, wi, wi)
+        val wc = doubleArrayOf(wc0, wi, wi)
+
+        var zPred = 0.0
+        for (i in sigma.indices) zPred += wm[i] * sigma[i]
+
+        var S = R
+        var Cxz = 0.0
+        for (i in sigma.indices) {
+            val dz = sigma[i] - zPred
+            val dx = sigma[i] - xPred
+            S   += wc[i] * dz * dz
+            Cxz += wc[i] * dx * dz
+        }
+
+        val K = Cxz / S
+        x = xPred + K * (z - zPred)
+        P = PPred - K * S * K
+
+        return x
+    }
+}
+
+/* ---------- 상수 ---------- */
+const val RSSI_AT_1M         = -40
+const val PATH_LOSS_EXPONENT = 3.0
+const val WALL_LOSS_DB       = 1
+const val MIN_RSSI           = -80
+
+/* -------------------------------------------------------------------------- */
+/* --------------------------  Compose 상태 헬퍼  --------------------------- */
+/* -------------------------------------------------------------------------- */
+
+@Composable
+fun rememberWifiDistances(locationGranted: Boolean): State<List<WifiDisplay>> {
+    val context = LocalContext.current
+    return produceState(
+        initialValue = emptyList(),
+        key1 = locationGranted
+    ) {
+        if (!locationGranted) {
+            value = emptyList()
+            return@produceState
+        }
+
+        val wifiManager =
+            context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        if (!wifiManager.isWifiEnabled) wifiManager.isWifiEnabled = true
+
+        /* UKF 상태를 BSSID별로 보존 */
+        val ukfMap: SnapshotStateMap<String, WifiUkf> = mutableStateMapOf()
+
+        /* 브로드캐스트 수신기로 스캔 결과 갱신 */
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                val results = wifiManager.scanResults
+                value = results.toDisplayList(ukfMap)
+            }
+        }
+        context.registerReceiver(receiver,
+            IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
+
+        /* 5 초 주기로 스캔 반복 */
+        while (true) {
+            try { wifiManager.startScan() } catch (_: Exception) { /* ignore */ }
+            delay(5_000L)
+        }
+
+        /* onDispose – produceState 자동 해제 */
+        @Suppress("UNREACHABLE_CODE")
+        context.unregisterReceiver(receiver)
+    }
+}

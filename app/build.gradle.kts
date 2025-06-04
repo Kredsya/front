@@ -66,5 +66,5 @@ dependencies {
     //google icon "androidx.compose.material:material-icons-extended:1.6.6"
     implementation("androidx.compose.material:material-icons-extended:1.6.6")
 
-
+    implementation("androidx.compose.foundation:foundation:1.6.6")
 }
