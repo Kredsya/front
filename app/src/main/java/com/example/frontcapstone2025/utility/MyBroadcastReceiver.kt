@@ -1,4 +1,4 @@
-package com.example.frontcapstone2025.api
+package com.example.frontcapstone2025.utility
 
 import android.content.BroadcastReceiver
 import android.content.Context
