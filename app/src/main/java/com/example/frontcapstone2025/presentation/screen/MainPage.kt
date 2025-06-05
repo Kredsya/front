@@ -7,19 +7,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.frontcapstone2025.components.buttons.CircularSearchButton
 import com.example.frontcapstone2025.components.buttons.CustomButton
 import com.example.frontcapstone2025.components.layout.BottomMenu
 import com.example.frontcapstone2025.components.layout.MainPageTopBar
+import com.example.frontcapstone2025.viemodel.MainViewModel
 
 @Composable
 fun MainPage(
     bottomBaronClickedActions: List<() -> Unit>,
     moveToLoadingPage: () -> Unit,
     pinnedWifiName: String = "",
-    navToHelpPage: () -> Unit
+    navToHelpPage: () -> Unit,
+    mainViewModel: MainViewModel
 ) {
     Scaffold(
         modifier = Modifier
@@ -38,6 +41,11 @@ fun MainPage(
         },
 
         ) { innerPadding ->
+
+        LaunchedEffect(Unit) {
+            mainViewModel.getWifiPosition()
+        }
+
         Column(
             modifier = Modifier
                 .padding(innerPadding)

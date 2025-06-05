@@ -15,6 +15,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField("String", "BASE_URL", "\"https://capstone2025backend.onrender.com\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -36,6 +38,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -58,7 +61,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     //viewModel : "androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2"
-    implementation( libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     //navigate : androidx.navigation:navigation-compose:2.8.3
     implementation(libs.androidx.navigation.compose)
@@ -67,4 +70,11 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.6.6")
 
     implementation("androidx.compose.foundation:foundation:1.6.6")
+
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0") //"com.squareup.retrofit2:retrofit:2.9.0"
+// Retrofit with Scalar Converter
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0") //"com.squareup.retrofit2:converter-scalars:2.9.0"
+    implementation("com.google.code.gson:gson:2.11.0") // "com.google.code.gson:gson:2.11.0"
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0") //"com.squareup.retrofit2:converter-gson:2.11.0"
 }

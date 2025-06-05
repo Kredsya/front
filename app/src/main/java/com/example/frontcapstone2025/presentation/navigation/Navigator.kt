@@ -22,6 +22,7 @@ import com.example.frontcapstone2025.presentation.screen.MainPage
 import com.example.frontcapstone2025.presentation.screen.SearchWifiPage
 import com.example.frontcapstone2025.presentation.screen.SettingPage
 import com.example.frontcapstone2025.presentation.screen.WifiListPage
+import com.example.frontcapstone2025.viemodel.MainViewModel
 
 fun navivationWithClear(navController: NavController, route: String) {
     navController.popBackStack()
@@ -29,7 +30,9 @@ fun navivationWithClear(navController: NavController, route: String) {
 }
 
 @Composable
-fun Navigator() {
+fun Navigator(
+    mainViewModel: MainViewModel,
+) {
     val navController = rememberNavController()
 
     val navigationBack: () -> Unit = { navController.navigateUp() }
@@ -62,7 +65,8 @@ fun Navigator() {
                         centerButtonTarget = "WifiListPage"
                     },
                     pinnedWifiName = pinnedWifiName,
-                    navToHelpPage = { navController.navigate("HelpPage") }
+                    navToHelpPage = { navController.navigate("HelpPage") },
+                    mainViewModel = mainViewModel
 
                 )
             }
