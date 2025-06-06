@@ -62,6 +62,7 @@ fun WifiListPage(
     val showContent by mainViewModel.wifiListReady.collectAsState()
     val chosenWifi by mainViewModel.chosenWifi.collectAsState()
     val wifiSearchTime by mainViewModel.wifiSearchTime.collectAsState() //칼만필터 시간 설정 가져오기
+    val suspiciousNames by mainViewModel.suspiciousWifi.collectAsState()
 
     LaunchedEffect(Unit) {
         val has = ActivityCompat.checkSelfPermission(
@@ -75,6 +76,7 @@ fun WifiListPage(
             )
         )
         if (!showContent) {
+            mainViewModel.startCaptureAndAnalyze(context)
             delay(wifiSearchTime)
             mainViewModel.setWifiListReady(true)
         }
@@ -83,9 +85,13 @@ fun WifiListPage(
     /* ---------- 스캔 결과 상태 ---------- */
     val wifiDistances by rememberWifiDistances(locationGranted.value, wifiSearchTime)
     /* 분류 */
-    // @todo: suspicious를 BE PCAP features에 던져서 가져오는 걸로 변경할 것. 지금은 가장 가까운 2개를 임의로 suspicious에 넣고 있음.
-    val suspicious = wifiDistances.take(2)
-    val others = wifiDistances.drop(2)
+    // @todo: 일단 하긴 했는데 너무 졸려서 테스트는 못해봤어요
+    val suspicious = wifiDistances.filter { wifi ->
+        suspiciousNames.any { it.equals(wifi.bssid, ignoreCase = true) }
+    }
+    val others = wifiDistances.filterNot { wifi ->
+        suspiciousNames.any { it.equals(wifi.bssid, ignoreCase = true) }
+    }
 
     /* ---------- UI ---------- */
     if (showContent) {
@@ -201,6 +207,7 @@ private fun WifiBox(
                     WifiComponent(
                         onSearchClicked = { setPinnedWifiName(info.ssid) },
                         name = info.ssid,
+                        bssid = info.bssid,
                         distance = info.distanceString,
                         showFindButtonOrNot = showFindButton
                     )

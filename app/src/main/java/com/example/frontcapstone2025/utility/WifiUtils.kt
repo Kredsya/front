@@ -25,6 +25,7 @@ import kotlin.math.pow
 
 data class WifiDisplay(
     val ssid: String,
+    val bssid: String,
     val distance: Double
 ) {
     val distanceString: String =
@@ -40,7 +41,11 @@ fun List<ScanResult>.toDisplayList(
             val raw = rssiToDistance(res.level)
             val ukf = ukfMap.getOrPut(res.BSSID) { WifiUkf(initial = raw) }
             val dist = ukf.update(raw)
-            WifiDisplay(res.SSID.ifBlank { res.BSSID }, dist)
+            WifiDisplay(
+                res.SSID.ifBlank { res.BSSID },
+                res.BSSID,
+                dist
+            )
         }
         .sortedBy { it.distance }
 

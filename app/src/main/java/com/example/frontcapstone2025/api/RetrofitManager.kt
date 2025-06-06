@@ -3,8 +3,12 @@ package com.example.frontcapstone2025.api
 import android.util.Log
 import com.example.frontcapstone2025.BuildConfig
 import com.google.gson.GsonBuilder
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 import java.time.LocalDateTime
 
 
@@ -55,6 +59,29 @@ class RetrofitManager {
         } catch (e: Exception) {
             Log.e("getWifiPosition", e.toString())
 //            onFailure()
+        }
+    }
+
+    suspend fun analyzePcap(
+        file: File,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: () -> Unit,
+    ) {
+        try {
+            val requestBody = file.asRequestBody("application/octet-stream".toMediaTypeOrNull())
+            val body = MultipartBody.Part.createFormData("file", file.name, requestBody)
+            val response = apiService.analyzePcap(body)
+            if (response.isSuccessful) {
+                val result = response.body() ?: emptyList()
+                Log.d("analyzePcap", "Success: $result")
+                onSuccess(result)
+            } else {
+                Log.e("analyzePcap", "Error: ${response.errorBody()}")
+                onFailure()
+            }
+        } catch (e: Exception) {
+            Log.e("analyzePcap", e.toString())
+            onFailure()
         }
     }
 }

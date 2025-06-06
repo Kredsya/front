@@ -8,6 +8,7 @@ import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.frontcapstone2025.api.RetrofitManager
 import com.example.frontcapstone2025.api.WifiPosition
 import com.example.frontcapstone2025.utility.WifiUkf
@@ -17,7 +18,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlin.coroutines.resume
+import java.io.File
 
 class MainViewModel : ViewModel() {
     private val _chosenWifi = MutableStateFlow("")
@@ -45,6 +49,9 @@ class MainViewModel : ViewModel() {
 
     private val _showDialog = MutableStateFlow(false)
     val showDialog: StateFlow<Boolean> = _showDialog
+
+    private val _suspiciousWifi = MutableStateFlow<List<String>>(emptyList())
+    val suspiciousWifi: StateFlow<List<String>> = _suspiciousWifi.asStateFlow()
 
 
     suspend fun getWifiPosition() {
@@ -150,5 +157,33 @@ class MainViewModel : ViewModel() {
         }
     }
 
-
+    fun startCaptureAndAnalyze(context: Context) {
+        viewModelScope.launch {
+            try {
+                val startIntent = Intent(Intent.ACTION_VIEW).apply {
+                    setClassName("com.usbwifimon.app", "com.usbwifimon.app.CaptureCtrl")
+                    putExtra("action", "start")
+                    putExtra("channel", -1)
+                    putExtra("channel_width", 1)
+                    putExtra("pcap_name", "Capture.pcap")
+                }
+                context.startActivity(startIntent)
+                delay(30_000L)
+                val stopIntent = Intent(Intent.ACTION_VIEW).apply {
+                    setClassName("com.usbwifimon.app", "com.usbwifimon.app.CaptureCtrl")
+                    putExtra("action", "stop")
+                }
+                context.startActivity(stopIntent)
+                // @todo: 파일 관련 다시 확인
+                val file = File("/UsbWifiMonitor/Capture.pcap")
+                RetrofitManager.instance.analyzePcap(
+                    file = file,
+                    onSuccess = { list -> _suspiciousWifi.value = list },
+                    onFailure = {}
+                )
+            } catch (e: Exception) {
+                Log.e("startCapture", e.toString())
+            }
+        }
+    }
 }
