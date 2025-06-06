@@ -114,7 +114,10 @@ const val MIN_RSSI = -80
 /* -------------------------------------------------------------------------- */
 
 @Composable
-fun rememberWifiDistances(locationGranted: Boolean): State<List<WifiDisplay>> {
+fun rememberWifiDistances(
+    locationGranted: Boolean,
+    wifiSearchTime: Long
+): State<List<WifiDisplay>> {
     val context = LocalContext.current
     return produceState(
         initialValue = emptyList(),
@@ -161,7 +164,7 @@ fun rememberWifiDistances(locationGranted: Boolean): State<List<WifiDisplay>> {
                 wifiManager.startScan()
             } catch (_: Exception) { /* ignore */
             }
-            delay(5_000L)
+            delay(wifiSearchTime)
         }
 
         /* onDispose – produceState 자동 해제 */

@@ -13,10 +13,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,15 +25,17 @@ import androidx.compose.ui.unit.dp
 import com.example.frontcapstone2025.components.layout.TopBarWithBack
 import com.example.frontcapstone2025.ui.theme.DivideLineColor
 import com.example.frontcapstone2025.ui.theme.TextColorGray
+import com.example.frontcapstone2025.viemodel.MainViewModel
 
 @Composable
 fun GetArmLengthPage(
     navigationBack: () -> Unit,
     moveToGetAllDistancePage: () -> Unit,
-    pinnedWifiName: String,
-    navToHelpPage: () -> Unit
+    navToHelpPage: () -> Unit,
+    mainViewModel: MainViewModel,
 ) {
-    var armLength by rememberSaveable { mutableStateOf("") }
+    val armLength by mainViewModel.armLength.collectAsState()
+    val chosenWifi by mainViewModel.chosenWifi.collectAsState()
 
     Scaffold(
         modifier = Modifier
@@ -43,7 +43,7 @@ fun GetArmLengthPage(
         topBar = {
             TopBarWithBack(
                 navigationBack = navigationBack,
-                pinnedWifiName = pinnedWifiName,
+                pinnedWifiName = chosenWifi,
                 navToHelpPage = navToHelpPage
             )
         },
@@ -68,10 +68,12 @@ fun GetArmLengthPage(
                 horizontalArrangement = Arrangement.Center
             ) {
                 TextField(
-                    value = armLength,
+                    value = if (armLength == -1.0) "" else armLength.toString(),
                     onValueChange = { ar ->
                         if (ar.matches(Regex("^\\d{0,3}(\\.\\d{0,2})?$"))) {
-                            armLength = ar
+                            ar.toDoubleOrNull()?.let {
+                                mainViewModel.setArmLength(it)
+                            }
                         }
                     },
                     placeholder = { Text("팔 길이를 입력하세요. (예: 64.2)") },

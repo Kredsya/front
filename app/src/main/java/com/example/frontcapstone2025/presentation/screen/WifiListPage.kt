@@ -5,26 +5,38 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
-import com.example.frontcapstone2025.components.buttons.CustomButton
+import com.example.frontcapstone2025.components.items.LoadingComponent
 import com.example.frontcapstone2025.components.items.WifiComponent
 import com.example.frontcapstone2025.components.layout.BottomMenu
 import com.example.frontcapstone2025.components.layout.MainPageTopBar
 import com.example.frontcapstone2025.ui.theme.TextColorGray
 import com.example.frontcapstone2025.utility.WifiDisplay
 import com.example.frontcapstone2025.utility.rememberWifiDistances
+import com.example.frontcapstone2025.viemodel.MainViewModel
+import kotlinx.coroutines.delay
 
 /* -------------------------------------------------------------------------- */
 /* ------------------------------  Composable  ------------------------------ */
@@ -34,9 +46,8 @@ import com.example.frontcapstone2025.utility.rememberWifiDistances
 fun WifiListPage(
     bottomBaronClickedActions: List<() -> Unit>,
     moveToFirstMainPage: () -> Unit,
-    pinnedWifiName: String,
-    setPinnedWifiName: (String) -> Unit,
-    navToHelpPage: () -> Unit
+    navToHelpPage: () -> Unit,
+    mainViewModel: MainViewModel
 ) {
     /* ---------- 권한 요청 ---------- */
     val context = LocalContext.current
@@ -46,6 +57,11 @@ fun WifiListPage(
     ) { result ->
         locationGranted.value = result.values.all { it }
     }
+
+    // 시간 및 로딩 컴포넌트 관련
+    val showContent by mainViewModel.wifiListReady.collectAsState()
+    val chosenWifi by mainViewModel.chosenWifi.collectAsState()
+    val wifiSearchTime by mainViewModel.wifiSearchTime.collectAsState() //칼만필터 시간 설정 가져오기
 
     LaunchedEffect(Unit) {
         val has = ActivityCompat.checkSelfPermission(
@@ -58,72 +74,81 @@ fun WifiListPage(
                 Manifest.permission.ACCESS_COARSE_LOCATION
             )
         )
+        if (!showContent) {
+            delay(wifiSearchTime)
+            mainViewModel.setWifiListReady(true)
+        }
     }
 
     /* ---------- 스캔 결과 상태 ---------- */
-    val wifiDistances by rememberWifiDistances(locationGranted.value)
-
+    val wifiDistances by rememberWifiDistances(locationGranted.value, wifiSearchTime)
     /* 분류 */
     // @todo: suspicious를 BE PCAP features에 던져서 가져오는 걸로 변경할 것. 지금은 가장 가까운 2개를 임의로 suspicious에 넣고 있음.
     val suspicious = wifiDistances.take(2)
-    val others     = wifiDistances.drop(2)
+    val others = wifiDistances.drop(2)
 
     /* ---------- UI ---------- */
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            MainPageTopBar(
-                pinnedWifiName = pinnedWifiName,
-                navToHelpPage   = navToHelpPage
-            )
-        },
-        bottomBar = {
-            BottomMenu(
-                bottomBaronClickedActions = bottomBaronClickedActions,
-                currentScreen = "MainPage"
-            )
-        },
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-        ) {
-            /* --------------  (1) 현재 의심스러운 기기 -------------- */
+    if (showContent) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                MainPageTopBar(
+                    pinnedWifiName = chosenWifi,
+                    navToHelpPage = navToHelpPage
+                )
+            },
+            bottomBar = {
+                BottomMenu(
+                    bottomBaronClickedActions = bottomBaronClickedActions,
+                    currentScreen = "MainPage"
+                )
+            },
+        ) { innerPadding ->
+
             Column(
                 modifier = Modifier
-                    .weight(0.75f)
-                    .verticalScroll(rememberScrollState())
+                    .padding(innerPadding)
+                    .fillMaxSize()
             ) {
-                Text(
-                    text = "현재 의심스러운 기기가 근처에 ${suspicious.size}대 있습니다.",
-                    color = TextColorGray,
+                /* --------------  (1) 현재 의심스러운 기기 -------------- */
+                Column(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 8.dp)
-                )
+                        .weight(0.75f)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = "현재 의심스러운 기기가 근처에 ${suspicious.size}대 있습니다.",
+                        color = TextColorGray,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 8.dp)
+                    )
 
-                WifiBox(list = suspicious,
-                    showFindButton = true,
-                    setPinnedWifiName = setPinnedWifiName)
+                    WifiBox(
+                        list = suspicious,
+                        showFindButton = true,
+                        setPinnedWifiName = { mainViewModel.setChosenWifi(it) }
+                    )
 
-                Spacer(modifier = Modifier.padding(vertical = 16.dp))
+                    Spacer(modifier = Modifier.padding(vertical = 16.dp))
 
-                /* --------------  (2) 그 외 멀리 있는 기기 -------------- */
-                Text(
-                    text = "그 외 멀리 있는 의심스러운 기기들",
-                    color = TextColorGray,
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 8.dp)
-                )
+                    /* --------------  (2) 그 외 멀리 있는 기기 -------------- */
+                    Text(
+                        text = "그 외 멀리 있는 의심스러운 기기들",
+                        color = TextColorGray,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 8.dp)
+                    )
 
-                WifiBox(list = others,
-                    showFindButton = false,
-                    setPinnedWifiName = setPinnedWifiName)
-            }
+                    WifiBox(
+                        list = others,
+                        showFindButton = false,
+                        setPinnedWifiName = { mainViewModel.setChosenWifi(it) }
+                    )
+                }
 
-            /* --------------  (3) 하단 버튼 -------------- */
+                /* --------------  (3) 하단 버튼 -------------- */
 //            Column(
 //                modifier = Modifier.weight(0.25f),
 //                verticalArrangement = Arrangement.Bottom
@@ -137,7 +162,10 @@ fun WifiListPage(
 //                    moveToFirstMainPage()
 //                }
 //            }
+            }
         }
+    } else {
+        LoadingComponent(text = "주변 네트워크를 검색하고 있어요.\n대략 30~40초 정도 걸려요.")
     }
 }
 
@@ -171,10 +199,10 @@ private fun WifiBox(
             } else {
                 list.forEach { info ->
                     WifiComponent(
-                        onSearchClicked       = { setPinnedWifiName(info.ssid) },
-                        name                  = info.ssid,
-                        distance              = info.distanceString,
-                        showFindButtonOrNot   = showFindButton
+                        onSearchClicked = { setPinnedWifiName(info.ssid) },
+                        name = info.ssid,
+                        distance = info.distanceString,
+                        showFindButtonOrNot = showFindButton
                     )
                 }
             }

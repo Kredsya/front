@@ -14,6 +14,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -33,20 +34,22 @@ import com.example.frontcapstone2025.components.layout.MainPageTopBar
 import com.example.frontcapstone2025.ui.theme.BottomBarBackground
 import com.example.frontcapstone2025.ui.theme.DivideLineColor
 import com.example.frontcapstone2025.ui.theme.TextColorGray
+import com.example.frontcapstone2025.viemodel.MainViewModel
 
 @Composable
 fun SettingPage(
     bottomBaronClickedActions: List<() -> Unit>,
-    pinnedWifiName: String,
-    navToHelpPage: () -> Unit
+    navToHelpPage: () -> Unit,
+    mainViewModel: MainViewModel
 ) {
     var locationPermission by rememberSaveable { mutableStateOf(true) }
     var storagePermission by rememberSaveable { mutableStateOf(true) }
 
+    val chosenWifi by mainViewModel.chosenWifi.collectAsState()
     Scaffold(
         topBar = {
             MainPageTopBar(
-                pinnedWifiName = pinnedWifiName,
+                pinnedWifiName = chosenWifi,
                 navToHelpPage = navToHelpPage
             )
         },
