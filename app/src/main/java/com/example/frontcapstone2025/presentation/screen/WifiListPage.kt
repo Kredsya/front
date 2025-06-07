@@ -85,7 +85,6 @@ fun WifiListPage(
     /* ---------- 스캔 결과 상태 ---------- */
     val wifiDistances by rememberWifiDistances(locationGranted.value, wifiSearchTime)
     /* 분류 */
-    // @todo: 일단 하긴 했는데 너무 졸려서 테스트는 못해봤어요
     val suspicious = wifiDistances.filter { wifi ->
         suspiciousNames.any { it.equals(wifi.bssid, ignoreCase = true) }
     }

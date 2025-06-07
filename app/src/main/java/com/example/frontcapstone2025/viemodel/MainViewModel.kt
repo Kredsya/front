@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
+import android.os.Environment
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -41,7 +42,7 @@ class MainViewModel : ViewModel() {
     private val _wifiPosition = MutableStateFlow(WifiPosition())
     val wifiPosition: StateFlow<WifiPosition> = _wifiPosition.asStateFlow()
 
-    private val _wifiSearchTime = MutableStateFlow(5000L)
+    private val _wifiSearchTime = MutableStateFlow(30_000L)     // 로딩 화면 지속 시간
     val wifiSearchTime: StateFlow<Long> = _wifiSearchTime.asStateFlow()
 
     private val _wifiListReady = MutableStateFlow(false)
@@ -174,8 +175,10 @@ class MainViewModel : ViewModel() {
                     putExtra("action", "stop")
                 }
                 context.startActivity(stopIntent)
+                delay(5_000L)
                 // @todo: 파일 관련 다시 확인
-                val file = File("/UsbWifiMonitor/Capture.pcap")
+                val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                val file = File(downloadsDir, "/UsbWifiMonitor/Capture.pcap")
                 RetrofitManager.instance.analyzePcap(
                     file = file,
                     onSuccess = { list -> _suspiciousWifi.value = list },
