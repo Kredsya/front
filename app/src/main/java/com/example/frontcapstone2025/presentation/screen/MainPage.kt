@@ -7,26 +7,31 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.frontcapstone2025.components.buttons.CircularSearchButton
 import com.example.frontcapstone2025.components.buttons.CustomButton
 import com.example.frontcapstone2025.components.layout.BottomMenu
 import com.example.frontcapstone2025.components.layout.MainPageTopBar
+import com.example.frontcapstone2025.viemodel.MainViewModel
 
 @Composable
 fun MainPage(
     bottomBaronClickedActions: List<() -> Unit>,
-    moveToLoadingPage: () -> Unit,
-    pinnedWifiName: String = "",
-    navToHelpPage: () -> Unit
+    moveToSearchWifiListPage: () -> Unit,
+    navToHelpPage: () -> Unit,
+    mainViewModel: MainViewModel
 ) {
+    val chosenWifi by mainViewModel.chosenWifi.collectAsState()
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
         topBar = {
             MainPageTopBar(
-                pinnedWifiName = pinnedWifiName,
+                pinnedWifiName = chosenWifi,
                 navToHelpPage = navToHelpPage
             )
         },
@@ -50,14 +55,14 @@ fun MainPage(
                     .fillMaxWidth()
                     .weight(1f),
             ) {
-                CircularSearchButton(onClicked = moveToLoadingPage)
+                CircularSearchButton(onClicked = moveToSearchWifiListPage)
             }
             Column(
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
             ) {
-                CustomButton(text = "스캔 시작", onClicked = moveToLoadingPage)
+                CustomButton(text = "스캔 시작", onClicked = moveToSearchWifiListPage)
             }
         }
     }

@@ -17,6 +17,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,25 +29,41 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import com.example.frontcapstone2025.R
 import com.example.frontcapstone2025.components.buttons.CustomButton
 import com.example.frontcapstone2025.components.layout.TopBarWithBack
 import com.example.frontcapstone2025.ui.theme.TextColorGray
+import com.example.frontcapstone2025.viemodel.MainViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun GetAllDistancePage(
     navigationBack: () -> Unit,
     navToOneDistancePage: List<() -> Unit>,
-    pinnedWifiName: String,
-    navToHelpPage: () -> Unit
+    navToHelpPage: () -> Unit,
+    mainViewModel: MainViewModel,
+    navToHome: () -> Unit
 ) {
+    val chosenWifi by mainViewModel.chosenWifi.collectAsState()
+    val upDistance by mainViewModel.upDistance.collectAsState()
+    val downDistance by mainViewModel.downDistance.collectAsState()
+    val leftDistance by mainViewModel.leftDistance.collectAsState()
+    val frontDistance by mainViewModel.frontDistance.collectAsState()
+    val armLength by mainViewModel.armLength.collectAsState()
+
+    val upImage = painterResource(R.drawable.up)
+    val downImage = painterResource(R.drawable.down)
+    val leftImage = painterResource(R.drawable.left)
+    val frontImage = painterResource(R.drawable.front)
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
         topBar = {
             TopBarWithBack(
                 navigationBack = navigationBack,
-                pinnedWifiName = pinnedWifiName,
+                pinnedWifiName = chosenWifi,
                 navToHelpPage = navToHelpPage
             )
         },
@@ -134,14 +152,14 @@ fun GetAllDistancePage(
                     modifier = Modifier.weight(0.5f)
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.up),
+                        painter = upImage,
                         contentDescription = null,
                         modifier = Modifier
                             .height(196.dp)
                             .clickable { navToOneDistancePage[0]() }
                     )
                     Text(
-                        text = "측정: O",
+                        text = if (upDistance != -1.0) "측정: O" else "측정: X",
                         modifier = Modifier,
                         color = TextColorGray
                     )
@@ -151,14 +169,14 @@ fun GetAllDistancePage(
                     modifier = Modifier.weight(0.5f)
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.down),
+                        painter = downImage,
                         contentDescription = null,
                         modifier = Modifier
                             .height(196.dp)
                             .clickable { navToOneDistancePage[1]() }
                     )
                     Text(
-                        text = "측정: X",
+                        text = if (downDistance != -1.0) "측정: O" else "측정: X",
                         modifier = Modifier,
                         color = TextColorGray
 
@@ -177,14 +195,14 @@ fun GetAllDistancePage(
                     modifier = Modifier.weight(0.5f)
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.left),
+                        painter = leftImage,
                         contentDescription = null,
                         modifier = Modifier
                             .height(196.dp)
                             .clickable { navToOneDistancePage[2]() }
                     )
                     Text(
-                        text = "측정: O",
+                        text = if (leftDistance != -1.0) "측정: O" else "측정: X",
                         modifier = Modifier,
                         color = TextColorGray
                     )
@@ -194,14 +212,14 @@ fun GetAllDistancePage(
                     modifier = Modifier.weight(0.5f)
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.front),
+                        painter = frontImage,
                         contentDescription = null,
                         modifier = Modifier
                             .height(196.dp)
                             .clickable { navToOneDistancePage[3]() }
                     )
                     Text(
-                        text = "측정: X",
+                        text = if (frontDistance != -1.0) "측정: O" else "측정: X",
                         modifier = Modifier,
                         color = TextColorGray
 
@@ -211,8 +229,20 @@ fun GetAllDistancePage(
 
             CustomButton(
                 text = "거리 측정 완료",
-                onClicked = {},
-                enabled = false
+                onClicked = {
+                    mainViewModel.viewModelScope.launch {
+                        mainViewModel.getWifiPosition()
+                        mainViewModel.setShowDialog(true)
+                        navToHome()
+                    }
+                },
+                enabled = (
+                        upDistance != -1.0 &&
+                                downDistance != -1.0 &&
+                                leftDistance != -1.0 &&
+                                frontDistance != -1.0 &&
+                                armLength != -1.0
+                        ),
             )
         }
 

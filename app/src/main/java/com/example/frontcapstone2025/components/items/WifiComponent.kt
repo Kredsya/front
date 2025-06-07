@@ -3,6 +3,7 @@ package com.example.frontcapstone2025.components.items
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,6 +35,7 @@ import com.example.frontcapstone2025.ui.theme.TextColorGray
 fun WifiComponent(
     onSearchClicked: () -> Unit,
     name: String,
+    bssid: String,
     distance: String,
     showFindButtonOrNot: Boolean = false
 ) {
@@ -55,15 +57,35 @@ fun WifiComponent(
         Spacer(modifier = Modifier.width(8.dp))
 
         // SSID 텍스트
-        Text(
-            text = name,
-            modifier = Modifier.weight(1f).basicMarquee().padding(end = 4.dp),
-            maxLines = 1,
-            overflow = TextOverflow.Visible,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            color = TextColorGray
-        )
+//        Text(
+//            text = name,
+//            modifier = Modifier.weight(1f).basicMarquee().padding(end = 4.dp),
+//            maxLines = 1,
+//            overflow = TextOverflow.Visible,
+//            fontWeight = FontWeight.Bold,
+//            fontSize = 24.sp,
+//            color = TextColorGray
+//        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 4.dp)
+        ) {
+            Text(
+                text = name,
+                modifier = Modifier.basicMarquee(),
+                maxLines = 1,
+                overflow = TextOverflow.Visible,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                color = TextColorGray
+            )
+            Text(
+                text = bssid,
+                fontSize = 12.sp,
+                color = TextColorGray
+            )
+        }
 
         Spacer(modifier = Modifier.width(8.dp))
 

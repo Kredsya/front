@@ -1,18 +1,23 @@
 package com.example.frontcapstone2025.utility
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
-import kotlin.math.pow
-import kotlin.math.sqrt
 import java.util.Locale
+import kotlin.math.pow
 
 /* -------------------------------------------------------------------------- */
 /* ----------------------------  데이터 & 계산  ----------------------------- */
@@ -20,6 +25,7 @@ import java.util.Locale
 
 data class WifiDisplay(
     val ssid: String,
+    val bssid: String,
     val distance: Double
 ) {
     val distanceString: String =
@@ -32,10 +38,14 @@ fun List<ScanResult>.toDisplayList(
     this
         .filter { it.level >= MIN_RSSI }                       // 신호 필터링
         .map { res ->
-            val raw  = rssiToDistance(res.level)
-            val ukf  = ukfMap.getOrPut(res.BSSID) { WifiUkf(initial = raw) }
+            val raw = rssiToDistance(res.level)
+            val ukf = ukfMap.getOrPut(res.BSSID) { WifiUkf(initial = raw) }
             val dist = ukf.update(raw)
-            WifiDisplay(res.SSID.ifBlank { res.BSSID }, dist)
+            WifiDisplay(
+                res.SSID.ifBlank { res.BSSID },
+                res.BSSID,
+                dist
+            )
         }
         .sortedBy { it.distance }
 
@@ -86,7 +96,7 @@ class WifiUkf(
         for (i in sigma.indices) {
             val dz = sigma[i] - zPred
             val dx = sigma[i] - xPred
-            S   += wc[i] * dz * dz
+            S += wc[i] * dz * dz
             Cxz += wc[i] * dx * dz
         }
 
@@ -99,17 +109,20 @@ class WifiUkf(
 }
 
 /* ---------- 상수 ---------- */
-const val RSSI_AT_1M         = -40
+const val RSSI_AT_1M = -40
 const val PATH_LOSS_EXPONENT = 3.0
-const val WALL_LOSS_DB       = 1
-const val MIN_RSSI           = -80
+const val WALL_LOSS_DB = 1
+const val MIN_RSSI = -80
 
 /* -------------------------------------------------------------------------- */
 /* --------------------------  Compose 상태 헬퍼  --------------------------- */
 /* -------------------------------------------------------------------------- */
 
 @Composable
-fun rememberWifiDistances(locationGranted: Boolean): State<List<WifiDisplay>> {
+fun rememberWifiDistances(
+    locationGranted: Boolean,
+    wifiSearchTime: Long
+): State<List<WifiDisplay>> {
     val context = LocalContext.current
     return produceState(
         initialValue = emptyList(),
@@ -130,17 +143,33 @@ fun rememberWifiDistances(locationGranted: Boolean): State<List<WifiDisplay>> {
         /* 브로드캐스트 수신기로 스캔 결과 갱신 */
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(ctx: Context?, intent: Intent?) {
-                val results = wifiManager.scanResults
-                value = results.toDisplayList(ukfMap)
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    val results = wifiManager.scanResults
+                    value = results.toDisplayList(ukfMap)
+                    // 이후 처리
+                } else {
+                    // 권한 없으면 요청하거나 무시
+                }
+//                val results = wifiManager.scanResults
+//                value = results.toDisplayList(ukfMap)
             }
         }
-        context.registerReceiver(receiver,
-            IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
+        context.registerReceiver(
+            receiver,
+            IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+        )
 
         /* 5 초 주기로 스캔 반복 */
         while (true) {
-            try { wifiManager.startScan() } catch (_: Exception) { /* ignore */ }
-            delay(5_000L)
+            try {
+                wifiManager.startScan()
+            } catch (_: Exception) { /* ignore */
+            }
+            delay(wifiSearchTime)
         }
 
         /* onDispose – produceState 자동 해제 */

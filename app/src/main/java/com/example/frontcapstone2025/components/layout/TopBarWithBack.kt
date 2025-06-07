@@ -64,10 +64,10 @@ fun TopBarWithBack(
                     modifier = Modifier
                         .size(48.dp)
                         .fillMaxWidth(0.1f),
-                    onClick = { navToHelpPage() }
+                    onClick = {}
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.keep_icon), // ✅ 변경된 부분
+                        painter = painterResource(id = R.drawable.keep_icon), // 변경된 부분
                         contentDescription = "keep",
                         modifier = Modifier.size(34.dp),
                         tint = BottomBarIconColor
@@ -83,7 +83,7 @@ fun TopBarWithBack(
                     modifier = Modifier
                         .size(48.dp)
                         .fillMaxWidth(0.1f),
-                    onClick = { }
+                    onClick = navToHelpPage
                 ) {
                     androidx.compose.material3.Icon(
                         modifier = Modifier.size(34.dp),

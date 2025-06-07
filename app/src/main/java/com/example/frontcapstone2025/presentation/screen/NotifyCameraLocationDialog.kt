@@ -39,7 +39,7 @@ fun NotifyCameraLocationDialog(
 ) {
 
     // 각도 계산 (라디안 → 도)
-    val angleRadians = kotlin.math.atan2(y, x)
+    val angleRadians = kotlin.math.atan2(x, y)
     val angleDegrees = Math.toDegrees(angleRadians)
 
 
