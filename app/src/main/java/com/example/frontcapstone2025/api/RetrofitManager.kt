@@ -5,11 +5,13 @@ import com.example.frontcapstone2025.BuildConfig
 import com.google.gson.GsonBuilder
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.asRequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit
 
 
 class RetrofitManager {
@@ -21,9 +23,17 @@ class RetrofitManager {
         .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
         .create()
 
+    val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(120, TimeUnit.SECONDS)     // 📌 백엔드가 오래 걸린다면 read timeout 늘리기
+        .writeTimeout(60, TimeUnit.SECONDS)
+        .build()
+
+
     private val retrofit = Retrofit.Builder()
         .baseUrl(BuildConfig.BASE_URL)
         .addConverterFactory(GsonConverterFactory.create(gson))
+        .client(client)
         .build()
     private val apiService = retrofit.create(ApiService::class.java)
 
@@ -74,7 +84,7 @@ class RetrofitManager {
             if (response.isSuccessful) {
                 val result = response.body() ?: emptyList()
                 Log.d("analyzePcap", "Success: $result")
-                onSuccess(result)
+                onSuccess(result[0])
             } else {
                 Log.e("analyzePcap", "Error: ${response.errorBody()}")
                 onFailure()
