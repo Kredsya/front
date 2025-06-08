@@ -105,16 +105,16 @@ fun WifiListPage(
     val wifiDistances by rememberWifiDistances(locationGranted.value, wifiScanDelay)
 
     // for debug
-    val suspicious = wifiDistances.take(2)
-    val others = wifiDistances.drop(2)
+//    val suspicious = wifiDistances.take(2)
+//    val others = wifiDistances.drop(2)
 
     /* 분류 */
-//    val suspicious = wifiDistances.filter { wifi ->
-//        suspiciousNames.any { it.equals(wifi.bssid, ignoreCase = true) }
-//    }
-//    val others = wifiDistances.filterNot { wifi ->
-//        suspiciousNames.any { it.equals(wifi.bssid, ignoreCase = true) }
-//    }
+    val suspicious = wifiDistances.filter { wifi ->
+        suspiciousNames.any { it.equals(wifi.bssid, ignoreCase = true) }
+    }
+    val others = wifiDistances.filterNot { wifi ->
+        suspiciousNames.any { it.equals(wifi.bssid, ignoreCase = true) }
+    }
 
     /* ---------- UI ---------- */
     if (showContent) {

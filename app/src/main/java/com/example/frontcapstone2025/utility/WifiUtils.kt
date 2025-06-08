@@ -111,7 +111,7 @@ class WifiUkf(
 }
 
 /* ---------- 상수 ---------- */
-const val RSSI_AT_1M = -30
+const val RSSI_AT_1M = -35
 const val PATH_LOSS_EXPONENT = 2.5
 const val WALL_LOSS_DB = 2
 const val MIN_RSSI = -70
