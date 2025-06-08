@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.example.frontcapstone2025.components.buttons.CircularSearchButton
 import com.example.frontcapstone2025.components.buttons.CustomButton
 import com.example.frontcapstone2025.components.layout.BottomMenu
@@ -62,7 +63,14 @@ fun MainPage(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
             ) {
-                CustomButton(text = "스캔 시작", onClicked = moveToSearchWifiListPage)
+                val context = LocalContext.current
+                CustomButton(
+                    text = "스캔 시작",
+                    onClicked = {
+                        mainViewModel.startCaptureAndAnalyze(context)
+                        moveToSearchWifiListPage()
+                    }
+                )
             }
         }
     }
