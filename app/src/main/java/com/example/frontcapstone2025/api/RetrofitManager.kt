@@ -77,29 +77,6 @@ class RetrofitManager {
     }
 
     suspend fun analyzePcap(
-        file: File,
-        onSuccess: (List<String>) -> Unit,
-        onFailure: () -> Unit,
-    ) {
-        try {
-            val requestBody = file.asRequestBody("application/octet-stream".toMediaTypeOrNull())
-            val body = MultipartBody.Part.createFormData("file", file.name, requestBody)
-            val response = apiService.analyzePcap(body)
-            if (response.isSuccessful) {
-                val result = response.body() ?: emptyList()
-                Log.d("analyzePcap", "Success: $result")
-                onSuccess(result[0])
-            } else {
-                Log.e("analyzePcap", "Error: ${response.errorBody()}")
-                onFailure()
-            }
-        } catch (e: Exception) {
-            Log.e("analyzePcap", e.toString())
-            onFailure()
-        }
-    }
-
-    suspend fun analyzePcap(
         context: Context,
         uri: Uri,
         onSuccess: (List<String>) -> Unit,
@@ -133,9 +110,10 @@ class RetrofitManager {
             val body = MultipartBody.Part.createFormData("file", "Capture.pcap", requestBody)
             val response = apiService.analyzePcap(body)
             if (response.isSuccessful) {
-                val result = response.body() ?: emptyList()
-                Log.d("analyzePcap", "Success: $result")
-                onSuccess(result[0])
+                val result = response.body()
+                Log.d("analyzePcap", "Success: ${gson.toJson(result)}")
+                val list = result?.getAllBssids() ?: emptyList()
+                onSuccess(list)
             } else {
                 Log.e("analyzePcap", "Error: ${response.errorBody()}")
                 onFailure()

@@ -23,5 +23,5 @@ interface ApiService {
     @POST("/pcap/analyze")
     suspend fun analyzePcap(
         @Part file: MultipartBody.Part,
-    ): Response<List<List<String>>>
+    ): Response<StreamResponse>
 }
