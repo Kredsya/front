@@ -40,7 +40,6 @@ import com.example.frontcapstone2025.ui.theme.TextColorGray
 import com.example.frontcapstone2025.utility.WifiDisplay
 import com.example.frontcapstone2025.utility.rememberWifiDistances
 import com.example.frontcapstone2025.viemodel.MainViewModel
-import kotlinx.coroutines.delay
 
 /* -------------------------------------------------------------------------- */
 /* ------------------------------  Composable  ------------------------------ */
@@ -78,7 +77,8 @@ fun WifiListPage(
     }
 
     // 시간 및 로딩 컴포넌트 관련
-    val showContent by mainViewModel.wifiListReady.collectAsState()
+//    val showContent by mainViewModel.wifiListReady.collectAsState()
+    val showLoading by mainViewModel.showLoading.collectAsState()
     val chosenWifi by mainViewModel.chosenWifi.collectAsState()
     val wifiScanDelay by mainViewModel.wifiScanDelay.collectAsState() // wifi 스캔 주기
     val suspiciousNames by mainViewModel.suspiciousWifi.collectAsState()
@@ -117,7 +117,7 @@ fun WifiListPage(
     }
 
     /* ---------- UI ---------- */
-    if (showContent) {
+    if (!showLoading) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {

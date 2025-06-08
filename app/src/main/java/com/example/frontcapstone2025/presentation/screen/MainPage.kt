@@ -67,6 +67,7 @@ fun MainPage(
                 CustomButton(
                     text = "스캔 시작",
                     onClicked = {
+                        mainViewModel.setShowLoading(true)
                         mainViewModel.startCaptureAndAnalyze(context)
                         moveToSearchWifiListPage()
                     }

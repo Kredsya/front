@@ -8,12 +8,10 @@ import com.google.gson.GsonBuilder
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
-import okhttp3.RequestBody.Companion.asRequestBody
 import okio.BufferedSink
 import okio.source
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.io.File
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
 
@@ -29,7 +27,7 @@ class RetrofitManager {
 
     val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(120, TimeUnit.SECONDS)     // 📌 백엔드가 오래 걸린다면 read timeout 늘리기
+        .readTimeout(120, TimeUnit.SECONDS)     // 백엔드가 오래 걸린다면 read timeout 늘리기
         .writeTimeout(60, TimeUnit.SECONDS)
         .build()
 
@@ -89,7 +87,10 @@ class RetrofitManager {
                 val buffer = ByteArray(10)
                 val count = input.read(buffer)
                 if (count > 0) {
-                    Log.d("analyzePcap", "First 10 bytes: ${buffer.joinToString("") { "%02x".format(it) }}")
+                    Log.d(
+                        "analyzePcap",
+                        "First 10 bytes: ${buffer.joinToString("") { "%02x".format(it) }}"
+                    )
                 }
             }
 
@@ -101,6 +102,7 @@ class RetrofitManager {
                     fd.close()
                     return length
                 }
+
                 override fun writeTo(sink: BufferedSink) {
                     resolver.openInputStream(uri)?.use { input ->
                         sink.writeAll(input.source())

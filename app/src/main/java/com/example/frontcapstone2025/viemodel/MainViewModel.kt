@@ -4,25 +4,22 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.net.wifi.ScanResult
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.Environment
 import android.util.Log
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.frontcapstone2025.api.RetrofitManager
 import com.example.frontcapstone2025.api.WifiPosition
 import com.example.frontcapstone2025.utility.WifiUkf
 import com.example.frontcapstone2025.utility.toDisplayList
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
-import kotlin.coroutines.resume
 import java.io.File
 
 class MainViewModel : ViewModel() {
@@ -58,6 +55,9 @@ class MainViewModel : ViewModel() {
     private val _suspiciousWifi = MutableStateFlow<List<String>>(emptyList())
     val suspiciousWifi: StateFlow<List<String>> = _suspiciousWifi.asStateFlow()
 
+
+    private val _showLoading = MutableStateFlow(false)
+    val showLoading: StateFlow<Boolean> = _showLoading
 
     suspend fun getWifiPosition() {
         RetrofitManager.instance.getWifiPosition(
@@ -101,6 +101,10 @@ class MainViewModel : ViewModel() {
 
     fun setShowDialog(value: Boolean) {
         _showDialog.value = value
+    }
+
+    fun setShowLoading(value: Boolean) {
+        _showLoading.value = value
     }
 
     fun isMeterChanged(): Boolean {
@@ -160,11 +164,17 @@ class MainViewModel : ViewModel() {
         val delayTime = _wifiScanDelay.value
         try {
             while (System.currentTimeMillis() - start < duration) {
-                try { wifiManager.startScan() } catch (_: Exception) { }
+                try {
+                    wifiManager.startScan()
+                } catch (_: Exception) {
+                }
                 delay(delayTime)
             }
         } finally {
-            try { context.unregisterReceiver(receiver) } catch (_: Exception) { }
+            try {
+                context.unregisterReceiver(receiver)
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -187,19 +197,26 @@ class MainViewModel : ViewModel() {
                 }
                 context.startActivity(stopIntent)
                 delay(5_000L)
-                val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                val downloadsDir =
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 val file = File(downloadsDir, "UsbWifiMonitor/Capture.pcap")
                 val uri = Uri.fromFile(file)
                 RetrofitManager.instance.analyzePcap(
                     context = context,
                     uri = uri,
-                    onSuccess = { list -> _suspiciousWifi.value = list },
-                    onFailure = {}
+                    onSuccess = { list ->
+                        _suspiciousWifi.value = list
+                        Log.d("startCapture", "onSuccess ${_showLoading.value}")
+                    },
+                    onFailure = {
+                    }
                 )
             } catch (e: Exception) {
                 Log.e("startCapture", e.toString())
             } finally {
                 _wifiListReady.value = true
+                _showLoading.value = false
+                Log.d("startCapture", "finally ${_showLoading.value}")
             }
         }
     }
