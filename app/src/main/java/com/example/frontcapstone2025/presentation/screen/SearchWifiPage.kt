@@ -62,7 +62,7 @@ fun SearchWifiPage(
                 x = wifiPosition.x,
                 y = wifiPosition.y,
                 z = wifiPosition.z,
-                meterChanged = mainViewModel.isMeterChanged(),
+                meterChanged = true,
                 onCloseClicked = { mainViewModel.setShowDialog(false) },
             )
         }

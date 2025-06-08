@@ -60,12 +60,15 @@ class MainViewModel : ViewModel() {
     val showLoading: StateFlow<Boolean> = _showLoading
 
     suspend fun getWifiPosition() {
+        // log all distance.value
+        Log.d("distance", "upDistance: ${upDistance.value} \ndownDistance: ${downDistance.value} \nfrontDistance: ${frontDistance.value} \nleftDistance: ${leftDistance.value} \narmLength: ${armLength.value}")
+
         RetrofitManager.instance.getWifiPosition(
-            upDistance = _upDistance.value / 100,
-            downDistance = _downDistance.value / 100,
-            frontDistance = _frontDistance.value / 100,
-            leftDistance = _leftDistance.value / 100,
-            armLength = _armLength.value,
+            upDistance = upDistance.value,
+            downDistance = downDistance.value,
+            frontDistance = frontDistance.value,
+            leftDistance = leftDistance.value,
+            armLength = armLength.value / 100,
             onSuccess = { wifiPosition: WifiPosition ->
                 Log.d("wifiposition", wifiPosition.toString())
                 _wifiPosition.update { wifiPosition }
