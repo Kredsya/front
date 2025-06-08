@@ -43,8 +43,8 @@ class MainViewModel : ViewModel() {
     private val _wifiPosition = MutableStateFlow(WifiPosition())
     val wifiPosition: StateFlow<WifiPosition> = _wifiPosition.asStateFlow()
 
-    private val _wifiScanTime = MutableStateFlow(30_000L)     // 와이파이 스캔 딜레이
-    val wifiScanTime: StateFlow<Long> = _wifiScanTime.asStateFlow()
+    private val _wifiScanDelay = MutableStateFlow(2_000L)     // 와이파이 스캔 딜레이
+    val wifiScanDelay: StateFlow<Long> = _wifiScanDelay.asStateFlow()
 
     private val _initialLoadingTime = MutableStateFlow(35_000L) // 로딩 딜레이
     val initialLoadingTime: StateFlow<Long> = _initialLoadingTime.asStateFlow()
@@ -181,7 +181,6 @@ class MainViewModel : ViewModel() {
                 }
                 context.startActivity(stopIntent)
                 delay(5_000L)
-                // @todo: 파일 관련 다시 확인
                 val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 val file = File(downloadsDir, "UsbWifiMonitor/Capture.pcap")
                 val uri = Uri.fromFile(file)

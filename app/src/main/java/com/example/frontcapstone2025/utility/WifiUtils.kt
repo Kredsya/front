@@ -24,6 +24,7 @@ import kotlin.math.pow
 /* -------------------------------------------------------------------------- */
 
 data class WifiDisplay(
+    val rssi: Int,
     val ssid: String,
     val bssid: String,
     val distance: Double
@@ -42,6 +43,7 @@ fun List<ScanResult>.toDisplayList(
             val ukf = ukfMap.getOrPut(res.BSSID) { WifiUkf(initial = raw) }
             val dist = ukf.update(raw)
             WifiDisplay(
+                res.level,
                 res.SSID.ifBlank { res.BSSID },
                 res.BSSID,
                 dist
@@ -50,7 +52,7 @@ fun List<ScanResult>.toDisplayList(
         .sortedBy { it.distance }
 
 /* ---------- RSSI → 거리 ---------- */
-fun rssiToDistance(rssi: Int, walls: Int = 1): Double {
+fun rssiToDistance(rssi: Int, walls: Int = 0): Double {
     val totalLoss = (RSSI_AT_1M - rssi) - (walls * WALL_LOSS_DB)
     return 10.0.pow(totalLoss / (10 * PATH_LOSS_EXPONENT))
 }
@@ -109,10 +111,10 @@ class WifiUkf(
 }
 
 /* ---------- 상수 ---------- */
-const val RSSI_AT_1M = -40
-const val PATH_LOSS_EXPONENT = 3.0
-const val WALL_LOSS_DB = 1
-const val MIN_RSSI = -80
+const val RSSI_AT_1M = -30
+const val PATH_LOSS_EXPONENT = 2.5
+const val WALL_LOSS_DB = 2
+const val MIN_RSSI = -70
 
 /* -------------------------------------------------------------------------- */
 /* --------------------------  Compose 상태 헬퍼  --------------------------- */

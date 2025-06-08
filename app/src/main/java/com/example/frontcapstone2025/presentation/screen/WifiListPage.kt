@@ -80,7 +80,7 @@ fun WifiListPage(
     // 시간 및 로딩 컴포넌트 관련
     val showContent by mainViewModel.wifiListReady.collectAsState()
     val chosenWifi by mainViewModel.chosenWifi.collectAsState()
-    val wifiScanTime by mainViewModel.wifiScanTime.collectAsState() // wifi 스캔 주기
+    val wifiScanDelay by mainViewModel.wifiScanDelay.collectAsState() // wifi 스캔 주기
     val suspiciousNames by mainViewModel.suspiciousWifi.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -102,7 +102,7 @@ fun WifiListPage(
     }
 
     /* ---------- 스캔 결과 상태 ---------- */
-    val wifiDistances by rememberWifiDistances(locationGranted.value, wifiScanTime)
+    val wifiDistances by rememberWifiDistances(locationGranted.value, wifiScanDelay)
     /* 분류 */
 //    val suspicious = wifiDistances.take(2)
 //    val others = wifiDistances.drop(2)
@@ -238,6 +238,7 @@ private fun WifiBox(
                         name = info.ssid,
                         bssid = info.bssid,
                         distance = info.distanceString,
+                        rssi = info.rssi,
                         showFindButtonOrNot = showFindButton
                     )
                 }
