@@ -1,10 +1,13 @@
 package com.example.frontcapstone2025.presentation.screen
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import com.example.frontcapstone2025.components.buttons.CustomButton
 import com.example.frontcapstone2025.components.items.LoadingComponent
 import com.example.frontcapstone2025.components.items.WifiComponent
 import com.example.frontcapstone2025.components.layout.BottomMenu
@@ -58,10 +62,25 @@ fun WifiListPage(
         locationGranted.value = result.values.all { it }
     }
 
+    val fileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    it,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                )
+            } catch (_: SecurityException) {
+            }
+            mainViewModel.analyzePcap(context, it)
+        }
+    }
+
     // 시간 및 로딩 컴포넌트 관련
     val showContent by mainViewModel.wifiListReady.collectAsState()
     val chosenWifi by mainViewModel.chosenWifi.collectAsState()
-    val wifiSearchTime by mainViewModel.wifiSearchTime.collectAsState() //칼만필터 시간 설정 가져오기
+    val wifiScanTime by mainViewModel.wifiScanTime.collectAsState() // wifi 스캔 주기
     val suspiciousNames by mainViewModel.suspiciousWifi.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -75,16 +94,18 @@ fun WifiListPage(
                 Manifest.permission.ACCESS_COARSE_LOCATION
             )
         )
-        if (!showContent) {
-            mainViewModel.startCaptureAndAnalyze(context)
-            delay(wifiSearchTime)
-            mainViewModel.setWifiListReady(true)
-        }
+//        if (!showContent) {
+//            mainViewModel.startCaptureAndAnalyze(context)
+//            delay(wifiSearchTime)
+//            mainViewModel.setWifiListReady(true)
+//        }
     }
 
     /* ---------- 스캔 결과 상태 ---------- */
-    val wifiDistances by rememberWifiDistances(locationGranted.value, wifiSearchTime)
+    val wifiDistances by rememberWifiDistances(locationGranted.value, wifiScanTime)
     /* 분류 */
+//    val suspicious = wifiDistances.take(2)
+//    val others = wifiDistances.drop(2)
     val suspicious = wifiDistances.filter { wifi ->
         suspiciousNames.any { it.equals(wifi.bssid, ignoreCase = true) }
     }
@@ -167,6 +188,15 @@ fun WifiListPage(
 //                    moveToFirstMainPage()
 //                }
 //            }
+                Column(
+                    modifier = Modifier.weight(0.25f),
+                    verticalArrangement = Arrangement.Bottom
+                ) {
+                    CustomButton(
+                        text = "캡쳐 파일 선택",
+                        onClicked = { fileLauncher.launch(arrayOf("*/*")) }
+                    )
+                }
             }
         }
     } else {

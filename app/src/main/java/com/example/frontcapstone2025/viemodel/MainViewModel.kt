@@ -8,6 +8,7 @@ import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.os.Environment
 import android.util.Log
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.frontcapstone2025.api.RetrofitManager
@@ -42,10 +43,13 @@ class MainViewModel : ViewModel() {
     private val _wifiPosition = MutableStateFlow(WifiPosition())
     val wifiPosition: StateFlow<WifiPosition> = _wifiPosition.asStateFlow()
 
-    private val _wifiSearchTime = MutableStateFlow(30_000L)     // 로딩 화면 지속 시간
-    val wifiSearchTime: StateFlow<Long> = _wifiSearchTime.asStateFlow()
+    private val _wifiScanTime = MutableStateFlow(30_000L)     // 와이파이 스캔 딜레이
+    val wifiScanTime: StateFlow<Long> = _wifiScanTime.asStateFlow()
 
-    private val _wifiListReady = MutableStateFlow(false)
+    private val _initialLoadingTime = MutableStateFlow(35_000L) // 로딩 딜레이
+    val initialLoadingTime: StateFlow<Long> = _initialLoadingTime.asStateFlow()
+
+    private val _wifiListReady = MutableStateFlow(true)
     val wifiListReady: StateFlow<Boolean> = _wifiListReady
 
     private val _showDialog = MutableStateFlow(false)
@@ -160,6 +164,7 @@ class MainViewModel : ViewModel() {
 
     fun startCaptureAndAnalyze(context: Context) {
         viewModelScope.launch {
+            _wifiListReady.value = false
             try {
                 val startIntent = Intent(Intent.ACTION_VIEW).apply {
                     setClassName("com.usbwifimon.app", "com.usbwifimon.app.CaptureCtrl")
@@ -178,15 +183,30 @@ class MainViewModel : ViewModel() {
                 delay(5_000L)
                 // @todo: 파일 관련 다시 확인
                 val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                val file = File(downloadsDir, "/UsbWifiMonitor/Capture.pcap")
+                val file = File(downloadsDir, "UsbWifiMonitor/Capture.pcap")
+                val uri = Uri.fromFile(file)
                 RetrofitManager.instance.analyzePcap(
-                    file = file,
+                    context = context,
+                    uri = uri,
                     onSuccess = { list -> _suspiciousWifi.value = list },
                     onFailure = {}
                 )
             } catch (e: Exception) {
                 Log.e("startCapture", e.toString())
+            } finally {
+                _wifiListReady.value = true
             }
+        }
+    }
+
+    fun analyzePcap(context: Context, uri: Uri) {
+        viewModelScope.launch {
+            RetrofitManager.instance.analyzePcap(
+                context = context,
+                uri = uri,
+                onSuccess = { list -> _suspiciousWifi.value = list },
+                onFailure = {}
+            )
         }
     }
 }

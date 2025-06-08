@@ -40,7 +40,7 @@ fun GetOneDistancePage(
 ) {
     val chosenWifi by mainViewModel.chosenWifi.collectAsState()
     val distance by mainViewModel.getDistanceById(id).collectAsState()
-    val wifiSearchTime by mainViewModel.wifiSearchTime.collectAsState()
+    val loadingTime by mainViewModel.initialLoadingTime.collectAsState()
     val context = LocalContext.current
 
     var isLoading by rememberSaveable { mutableStateOf(false) }
@@ -87,7 +87,7 @@ fun GetOneDistancePage(
                         isLoading = true
                         mainViewModel.viewModelScope.launch {
                             mainViewModel.scanAndSaveDistance(id, chosenWifi, context)
-                            delay(wifiSearchTime) // 🕒 로딩 지속 시간
+                            delay(loadingTime) // 🕒 로딩 지속 시간
                             isLoading = false
                         }
                     }

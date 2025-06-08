@@ -1,5 +1,7 @@
 package com.example.frontcapstone2025.api
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import com.example.frontcapstone2025.BuildConfig
 import com.google.gson.GsonBuilder
@@ -7,6 +9,8 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.asRequestBody
+import okio.BufferedSink
+import okio.source
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
@@ -73,18 +77,43 @@ class RetrofitManager {
     }
 
     suspend fun analyzePcap(
-        file: File,
+        context: Context,
+        uri: Uri,
         onSuccess: (List<String>) -> Unit,
         onFailure: () -> Unit,
     ) {
         try {
-            val requestBody = file.asRequestBody("application/octet-stream".toMediaTypeOrNull())
-            val body = MultipartBody.Part.createFormData("file", file.name, requestBody)
+            val resolver = context.contentResolver
+            // read first 10 bytes for debugging
+            resolver.openInputStream(uri)?.use { input ->
+                val buffer = ByteArray(10)
+                val count = input.read(buffer)
+                if (count > 0) {
+                    Log.d("analyzePcap", "First 10 bytes: ${buffer.joinToString("") { "%02x".format(it) }}")
+                }
+            }
+
+            val requestBody = object : okhttp3.RequestBody() {
+                override fun contentType() = "application/octet-stream".toMediaTypeOrNull()
+                override fun contentLength(): Long {
+                    val fd = resolver.openFileDescriptor(uri, "r") ?: return 0L
+                    val length = fd.statSize
+                    fd.close()
+                    return length
+                }
+                override fun writeTo(sink: BufferedSink) {
+                    resolver.openInputStream(uri)?.use { input ->
+                        sink.writeAll(input.source())
+                    } ?: throw IllegalArgumentException("Cannot open InputStream from URI")
+                }
+            }
+            val body = MultipartBody.Part.createFormData("file", "Capture.pcap", requestBody)
             val response = apiService.analyzePcap(body)
             if (response.isSuccessful) {
-                val result = response.body() ?: emptyList()
-                Log.d("analyzePcap", "Success: $result")
-                onSuccess(result[0])
+                val result = response.body()
+                Log.d("analyzePcap", "Success: ${gson.toJson(result)}")
+                val list = result?.getAllBssids() ?: emptyList()
+                onSuccess(list)
             } else {
                 Log.e("analyzePcap", "Error: ${response.errorBody()}")
                 onFailure()
