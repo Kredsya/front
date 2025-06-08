@@ -43,7 +43,7 @@ class MainViewModel : ViewModel() {
     private val _wifiPosition = MutableStateFlow(WifiPosition())
     val wifiPosition: StateFlow<WifiPosition> = _wifiPosition.asStateFlow()
 
-    private val _wifiScanDelay = MutableStateFlow(2_000L)     // 와이파이 스캔 딜레이
+    private val _wifiScanDelay = MutableStateFlow(1_000L)     // 와이파이 스캔 딜레이
     val wifiScanDelay: StateFlow<Long> = _wifiScanDelay.asStateFlow()
 
     private val _initialLoadingTime = MutableStateFlow(35_000L) // 로딩 딜레이
@@ -129,7 +129,7 @@ class MainViewModel : ViewModel() {
 
 
     // 버튼 클릭 시 쓰기 위해 일단 옮겨봄.
-    suspend fun scanAndSaveDistance(
+    suspend fun scanDistanceRepeatedly(
         id: Int,
         targetSsid: String,
         context: Context
@@ -139,26 +139,32 @@ class MainViewModel : ViewModel() {
 
         if (!wifiManager.isWifiEnabled) wifiManager.isWifiEnabled = true
 
-        val result = suspendCancellableCoroutine<List<ScanResult>> { cont ->
-            val receiver = object : BroadcastReceiver() {
-                override fun onReceive(ctx: Context?, intent: Intent?) {
-                    context.unregisterReceiver(this)
-                    cont.resume(wifiManager.scanResults)
-                }
+        val ukfMap = mutableMapOf<String, WifiUkf>()
+
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                val results = wifiManager.scanResults
+                val displays = results.toDisplayList(ukfMap)
+                val match = displays.find { it.ssid == targetSsid }
+                match?.let { setDistanceById(id, it.distance) }
             }
-            context.registerReceiver(
-                receiver,
-                IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-            )
-            wifiManager.startScan()
         }
 
-        val ukfMap = mutableMapOf<String, WifiUkf>()
-        val displays = result.toDisplayList(ukfMap)
+        context.registerReceiver(
+            receiver,
+            IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+        )
 
-        val match = displays.find { it.ssid == targetSsid }
-        match?.let {
-            setDistanceById(id, it.distance)
+        val start = System.currentTimeMillis()
+        val duration = _initialLoadingTime.value
+        val delayTime = _wifiScanDelay.value
+        try {
+            while (System.currentTimeMillis() - start < duration) {
+                try { wifiManager.startScan() } catch (_: Exception) { }
+                delay(delayTime)
+            }
+        } finally {
+            try { context.unregisterReceiver(receiver) } catch (_: Exception) { }
         }
     }
 
