@@ -37,6 +37,7 @@ fun WifiComponent(
     name: String,
     bssid: String,
     distance: String,
+    rssi: Int,
     showFindButtonOrNot: Boolean = false
 ) {
     Row(
@@ -96,7 +97,7 @@ fun WifiComponent(
             contentAlignment = Alignment.BottomEnd,
         ) {
             Text(
-                text = distance,
+                text = "$distance/$rssi",
                 fontSize = 16.sp,
                 color = TextColorGray,
                 modifier = Modifier.padding(end = 8.dp, bottom = 10.dp)
