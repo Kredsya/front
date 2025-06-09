@@ -1,5 +1,6 @@
 package com.example.frontcapstone2025.presentation.screen
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,6 +39,7 @@ import com.example.frontcapstone2025.ui.theme.DivideLineColor
 import com.example.frontcapstone2025.ui.theme.TextColorGray
 import com.example.frontcapstone2025.viemodel.MainViewModel
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun SettingPage(
     bottomBaronClickedActions: List<() -> Unit>,
@@ -164,7 +166,7 @@ fun SettingPage(
 
                     // Wifi 설정 슬라이더
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Text("RSSI at 1m: ${'$'}{rssiAt1m.toInt()} dBm", color = TextColorGray)
+                        Text("RSSI at 1m: ${rssiAt1m.toInt()} dBm", color = TextColorGray)
                         Slider(
                             value = rssiAt1m,
                             onValueChange = {
@@ -174,7 +176,7 @@ fun SettingPage(
                             valueRange = -90f..-20f
                         )
 
-                        Text("Path Loss Exponent: ${'$'}{String.format(\"%.2f\", pathLossExponent)}", color = TextColorGray)
+                        Text("Path Loss Exponent: ${String.format("%.2f", pathLossExponent)}", color = TextColorGray)
                         Slider(
                             value = pathLossExponent,
                             onValueChange = {
@@ -184,7 +186,7 @@ fun SettingPage(
                             valueRange = 1f..5f
                         )
 
-                        Text("Wall Loss dB: ${'$'}{wallLossDb.toInt()}", color = TextColorGray)
+                        Text("Wall Loss dB: ${wallLossDb.toInt()}", color = TextColorGray)
                         Slider(
                             value = wallLossDb,
                             onValueChange = {
@@ -194,7 +196,7 @@ fun SettingPage(
                             valueRange = 0f..10f
                         )
 
-                        Text("Min RSSI: ${'$'}{minRssi.toInt()} dBm", color = TextColorGray)
+                        Text("Min RSSI: ${minRssi.toInt()} dBm", color = TextColorGray)
                         Slider(
                             value = minRssi,
                             onValueChange = {
