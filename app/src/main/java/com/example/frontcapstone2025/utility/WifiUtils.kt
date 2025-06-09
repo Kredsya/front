@@ -15,6 +15,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.example.frontcapstone2025.utility.WifiConfig
 import kotlinx.coroutines.delay
 import java.util.Locale
 import kotlin.math.pow
@@ -37,7 +38,7 @@ fun List<ScanResult>.toDisplayList(
     ukfMap: MutableMap<String, WifiUkf>
 ): List<WifiDisplay> =
     this
-        .filter { it.level >= MIN_RSSI }                       // 신호 필터링
+        .filter { it.level >= WifiConfig.minRssi }                       // 신호 필터링
         .map { res ->
             val raw = rssiToDistance(res.level)
             val ukf = ukfMap.getOrPut(res.BSSID) { WifiUkf(initial = raw) }
@@ -53,8 +54,8 @@ fun List<ScanResult>.toDisplayList(
 
 /* ---------- RSSI → 거리 ---------- */
 fun rssiToDistance(rssi: Int, walls: Int = 0): Double {
-    val totalLoss = (RSSI_AT_1M - rssi) - (walls * WALL_LOSS_DB)
-    return 10.0.pow(totalLoss / (10 * PATH_LOSS_EXPONENT))
+    val totalLoss = (WifiConfig.rssiAt1m - rssi) - (walls * WifiConfig.wallLossDb)
+    return 10.0.pow(totalLoss / (10 * WifiConfig.pathLossExponent))
 }
 
 /* -------------------------------------------------------------------------- */
@@ -110,11 +111,8 @@ class WifiUkf(
     }
 }
 
-/* ---------- 상수 ---------- */
-const val RSSI_AT_1M = -38
-const val PATH_LOSS_EXPONENT = 2.5
-const val WALL_LOSS_DB = 1
-const val MIN_RSSI = -70
+/* ---------- Wifi 설정 값 ---------- */
+// WifiConfig 객체의 값을 수정하여 조정 가능
 
 /* -------------------------------------------------------------------------- */
 /* --------------------------  Compose 상태 헬퍼  --------------------------- */

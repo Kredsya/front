@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.frontcapstone2025.components.layout.BottomMenu
 import com.example.frontcapstone2025.components.layout.MainPageTopBar
+import com.example.frontcapstone2025.utility.WifiConfig
 import com.example.frontcapstone2025.ui.theme.BottomBarBackground
 import com.example.frontcapstone2025.ui.theme.DivideLineColor
 import com.example.frontcapstone2025.ui.theme.TextColorGray
@@ -44,6 +46,11 @@ fun SettingPage(
 ) {
     var locationPermission by rememberSaveable { mutableStateOf(true) }
     var storagePermission by rememberSaveable { mutableStateOf(true) }
+
+    var rssiAt1m by rememberSaveable { mutableStateOf(WifiConfig.rssiAt1m.toFloat()) }
+    var pathLossExponent by rememberSaveable { mutableStateOf(WifiConfig.pathLossExponent.toFloat()) }
+    var wallLossDb by rememberSaveable { mutableStateOf(WifiConfig.wallLossDb.toFloat()) }
+    var minRssi by rememberSaveable { mutableStateOf(WifiConfig.minRssi.toFloat()) }
 
     val chosenWifi by mainViewModel.chosenWifi.collectAsState()
     Scaffold(
@@ -150,6 +157,51 @@ fun SettingPage(
                             color = TextColorGray,
                             modifier = Modifier.height(28.dp),
                             fontSize = 16.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Wifi 설정 슬라이더
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text("RSSI at 1m: ${'$'}{rssiAt1m.toInt()} dBm", color = TextColorGray)
+                        Slider(
+                            value = rssiAt1m,
+                            onValueChange = {
+                                rssiAt1m = it
+                                WifiConfig.rssiAt1m = it.toInt()
+                            },
+                            valueRange = -90f..-20f
+                        )
+
+                        Text("Path Loss Exponent: ${'$'}{String.format(\"%.2f\", pathLossExponent)}", color = TextColorGray)
+                        Slider(
+                            value = pathLossExponent,
+                            onValueChange = {
+                                pathLossExponent = it
+                                WifiConfig.pathLossExponent = it.toDouble()
+                            },
+                            valueRange = 1f..5f
+                        )
+
+                        Text("Wall Loss dB: ${'$'}{wallLossDb.toInt()}", color = TextColorGray)
+                        Slider(
+                            value = wallLossDb,
+                            onValueChange = {
+                                wallLossDb = it
+                                WifiConfig.wallLossDb = it.toInt()
+                            },
+                            valueRange = 0f..10f
+                        )
+
+                        Text("Min RSSI: ${'$'}{minRssi.toInt()} dBm", color = TextColorGray)
+                        Slider(
+                            value = minRssi,
+                            onValueChange = {
+                                minRssi = it
+                                WifiConfig.minRssi = it.toInt()
+                            },
+                            valueRange = -100f..-30f
                         )
                     }
                 }
