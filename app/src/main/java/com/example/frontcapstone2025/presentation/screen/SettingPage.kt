@@ -46,6 +46,7 @@ import com.example.frontcapstone2025.ui.theme.BottomBarBackground
 import com.example.frontcapstone2025.ui.theme.DivideLineColor
 import com.example.frontcapstone2025.ui.theme.TextColorGray
 import com.example.frontcapstone2025.utility.rememberWifiDistances
+import com.example.frontcapstone2025.utility.zeroPhaseUkf
 import com.example.frontcapstone2025.viemodel.MainViewModel
 
 @SuppressLint("DefaultLocale")
@@ -126,19 +127,30 @@ fun SettingPage(
                     var resetKey by remember { mutableStateOf(0) }
                     val wifiScanDelay by mainViewModel.wifiScanDelay.collectAsState()
                     val wifiDistances by rememberWifiDistances(true, wifiScanDelay, resetKey)
-                    val graphPoints = remember { mutableStateListOf<WifiGraphPoint>() }
+                    val rawPoints = remember { mutableStateListOf<WifiGraphPoint>() }
+                    val filteredPoints = remember { mutableStateListOf<WifiGraphPoint>() }
+                    val rawValues = remember { mutableListOf<Double>() }
                     var index by remember { mutableStateOf(0) }
                     val pinned = wifiDistances.find { it.ssid == chosenWifi }
                     LaunchedEffect(pinned) {
                         pinned?.let {
-                            graphPoints.add(WifiGraphPoint(index++, it.rssi, it.distance))
+                            rawPoints.add(WifiGraphPoint(index, it.rawRssi, it.distance))
+                            rawValues.add(it.rawRssi)
+                            val filtered = zeroPhaseUkf(rawValues)
+                            filteredPoints.clear()
+                            filtered.forEachIndexed { idx, rssi ->
+                                filteredPoints.add(WifiGraphPoint(idx, rssi, rawPoints[idx].distance))
+                            }
+                            index++
                         }
                     }
 
-                    WifiGraph(points = graphPoints)
+                    WifiGraph(rawPoints = rawPoints, filteredPoints = filteredPoints)
                     Spacer(modifier = Modifier.height(8.dp))
                     CustomButton(text = "리셋", onClicked = {
-                        graphPoints.clear()
+                        rawPoints.clear()
+                        filteredPoints.clear()
+                        rawValues.clear()
                         index = 0
                         resetKey++
                     })

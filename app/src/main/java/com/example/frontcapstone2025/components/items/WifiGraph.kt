@@ -28,16 +28,22 @@ data class WifiGraphPoint(
 @SuppressLint("DefaultLocale")
 @Composable
 fun WifiGraph(
-    points: List<WifiGraphPoint>,
+    rawPoints: List<WifiGraphPoint>,
+    filteredPoints: List<WifiGraphPoint>,
     modifier: Modifier = Modifier
 ) {
-    val currentPoints: MutableState<List<WifiGraphPoint>> = remember { androidx.compose.runtime.mutableStateOf(points) }
-    LaunchedEffect(points) {
-        currentPoints.value = points
+    val currentRawPoints: MutableState<List<WifiGraphPoint>> = remember { androidx.compose.runtime.mutableStateOf(rawPoints) }
+    val currentFilteredPoints: MutableState<List<WifiGraphPoint>> = remember { androidx.compose.runtime.mutableStateOf(filteredPoints) }
+    LaunchedEffect(rawPoints) {
+        currentRawPoints.value = rawPoints
     }
-    val timeMax = currentPoints.value.maxOfOrNull { it.time } ?: 0
-    val rssiMax = currentPoints.value.maxOfOrNull { it.rssi } ?: 0.0
-    val rssiMin = currentPoints.value.minOfOrNull { it.rssi } ?: -100.0
+    LaunchedEffect(filteredPoints) {
+        currentFilteredPoints.value = filteredPoints
+    }
+    val allPoints = currentRawPoints.value + currentFilteredPoints.value
+    val timeMax = allPoints.maxOfOrNull { it.time } ?: 0
+    val rssiMax = allPoints.maxOfOrNull { it.rssi } ?: 0.0
+    val rssiMin = allPoints.minOfOrNull { it.rssi } ?: -100.0
 
     Canvas(
         modifier = modifier
@@ -83,15 +89,32 @@ fun WifiGraph(
             }
         }
 
-        if (currentPoints.value.isNotEmpty()) {
-            val path = Path()
-            currentPoints.value.forEachIndexed { index, point ->
+        if (allPoints.isNotEmpty()) {
+            val rawPath = Path()
+            currentRawPoints.value.forEachIndexed { index, point ->
                 val x = padding + (point.time.toFloat() / timeMax.coerceAtLeast(1)) * width
                 val y = padding + height - ((point.rssi - rssiMin).toFloat() / (rssiMax - rssiMin).toFloat()) * height
-                if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                if (index == 0) rawPath.moveTo(x, y) else rawPath.lineTo(x, y)
                 drawCircle(color = Color.Red, radius = 4.dp.toPx(), center = Offset(x, y))
             }
-            drawPath(path = path, color = Color.Blue, style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
+            drawPath(
+                path = rawPath,
+                color = Color.Red,
+                style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+            )
+
+            val filteredPath = Path()
+            currentFilteredPoints.value.forEachIndexed { index, point ->
+                val x = padding + (point.time.toFloat() / timeMax.coerceAtLeast(1)) * width
+                val y = padding + height - ((point.rssi - rssiMin).toFloat() / (rssiMax - rssiMin).toFloat()) * height
+                if (index == 0) filteredPath.moveTo(x, y) else filteredPath.lineTo(x, y)
+                drawCircle(color = Color.Blue, radius = 4.dp.toPx(), center = Offset(x, y))
+            }
+            drawPath(
+                path = filteredPath,
+                color = Color.Blue,
+                style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+            )
         }
     }
 }

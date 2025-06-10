@@ -28,7 +28,8 @@ data class WifiDisplay(
     val rssi: Double,
     val ssid: String,
     val bssid: String,
-    val distance: Double
+    val distance: Double,
+    val rawRssi: Double
 ) {
     val distanceString: String =
         String.format(Locale.US, "%.2f m", distance)
@@ -48,7 +49,8 @@ fun List<ScanResult>.toDisplayList(
                 filteredRssi,
                 res.SSID.ifBlank { res.BSSID },
                 res.BSSID,
-                dist
+                dist,
+                rawRssi
             )
         }
         .sortedBy { it.distance }
@@ -110,6 +112,20 @@ class WifiUkf(
 
         return x
     }
+}
+
+/* ---------- 무향 칼만 필터(zero-phase) ---------- */
+fun zeroPhaseUkf(values: List<Double>): List<Double> {
+    if (values.isEmpty()) return emptyList()
+    val forward = mutableListOf<Double>()
+    val ukfForward = WifiUkf(initial = values.first())
+    values.forEach { forward.add(ukfForward.update(it)) }
+
+    val backward = mutableListOf<Double>()
+    val ukfBackward = WifiUkf(initial = forward.last())
+    forward.asReversed().forEach { backward.add(ukfBackward.update(it)) }
+
+    return backward.asReversed()
 }
 
 /* ---------- Wifi 설정 값 ---------- */
