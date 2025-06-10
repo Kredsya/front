@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -16,9 +18,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,12 +36,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.frontcapstone2025.components.buttons.CustomButton
+import com.example.frontcapstone2025.components.items.WifiGraph
+import com.example.frontcapstone2025.components.items.WifiGraphPoint
 import com.example.frontcapstone2025.components.layout.BottomMenu
 import com.example.frontcapstone2025.components.layout.MainPageTopBar
 import com.example.frontcapstone2025.utility.WifiConfig
 import com.example.frontcapstone2025.ui.theme.BottomBarBackground
 import com.example.frontcapstone2025.ui.theme.DivideLineColor
 import com.example.frontcapstone2025.ui.theme.TextColorGray
+import com.example.frontcapstone2025.utility.rememberWifiDistances
 import com.example.frontcapstone2025.viemodel.MainViewModel
 
 @SuppressLint("DefaultLocale")
@@ -46,9 +55,6 @@ fun SettingPage(
     navToHelpPage: () -> Unit,
     mainViewModel: MainViewModel
 ) {
-    var locationPermission by rememberSaveable { mutableStateOf(true) }
-    var storagePermission by rememberSaveable { mutableStateOf(true) }
-
     var rssiAt1m by rememberSaveable { mutableStateOf(WifiConfig.rssiAt1m.toFloat()) }
     var pathLossExponent by rememberSaveable { mutableStateOf(WifiConfig.pathLossExponent.toFloat()) }
     var wallLossDb by rememberSaveable { mutableStateOf(WifiConfig.wallLossDb.toFloat()) }
@@ -73,6 +79,7 @@ fun SettingPage(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
         ) {
             Column(
                 modifier = Modifier
@@ -112,55 +119,29 @@ fun SettingPage(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // 위치 권한 스위치
                 Column(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Switch(
-                            checked = locationPermission,
-                            onCheckedChange = { locationPermission = it },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = BottomBarBackground,
-                                checkedTrackColor = DivideLineColor
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "위치 권한",
-                            color = TextColorGray,
-                            modifier = Modifier.height(28.dp),
-                            fontSize = 16.sp
-                        )
+                    var resetKey by remember { mutableStateOf(0) }
+                    val wifiScanDelay by mainViewModel.wifiScanDelay.collectAsState()
+                    val wifiDistances by rememberWifiDistances(true, wifiScanDelay, resetKey)
+                    val graphPoints = remember { mutableStateListOf<WifiGraphPoint>() }
+                    var index by remember { mutableStateOf(0) }
+                    val pinned = wifiDistances.find { it.ssid == chosenWifi }
+                    LaunchedEffect(pinned) {
+                        pinned?.let {
+                            graphPoints.add(WifiGraphPoint(index++, it.rssi, it.distance))
+                        }
                     }
 
-
-                    // 저장 공간 권한 스위치
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Switch(
-                            checked = storagePermission,
-                            onCheckedChange = { storagePermission = it },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = BottomBarBackground,
-                                checkedTrackColor = DivideLineColor
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "저장 공간 권한",
-                            color = TextColorGray,
-                            modifier = Modifier.height(28.dp),
-                            fontSize = 16.sp
-                        )
-                    }
+                    WifiGraph(points = graphPoints)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    CustomButton(text = "리셋", onClicked = {
+                        graphPoints.clear()
+                        index = 0
+                        resetKey++
+                    })
 
                     Spacer(modifier = Modifier.height(16.dp))
 

@@ -53,7 +53,7 @@ fun List<ScanResult>.toDisplayList(
         .sortedBy { it.distance }
 
 /* ---------- RSSI → 거리 ---------- */
-fun rssiToDistance(rssi: Int, walls: Int = 0): Double {
+fun rssiToDistance(rssi: Int, walls: Int = 1): Double {
     val totalLoss = (WifiConfig.rssiAt1m - rssi) - (walls * WifiConfig.wallLossDb)
     return 10.0.pow(totalLoss / (10 * WifiConfig.pathLossExponent))
 }
@@ -121,12 +121,14 @@ class WifiUkf(
 @Composable
 fun rememberWifiDistances(
     locationGranted: Boolean,
-    wifiScanDelay: Long
+    wifiScanDelay: Long,
+    resetKey: Int = 0
 ): State<List<WifiDisplay>> {
     val context = LocalContext.current
     return produceState(
         initialValue = emptyList(),
-        key1 = locationGranted
+        key1 = locationGranted,
+        key2 = resetKey
     ) {
         if (!locationGranted) {
             value = emptyList()
