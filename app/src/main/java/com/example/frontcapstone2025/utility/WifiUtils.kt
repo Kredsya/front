@@ -70,7 +70,7 @@ class WifiUkf(
     private val eta: Double = WifiConfig.pathLossExponent,
     private val dt: Double = 1.0,
     private val sigmaProcess: Double = 1.0,
-    private val alpha: Double = 1e-3,
+    private val alpha: Double = 1.0,
     private val kappa: Double = 0.0,
     private val beta: Double = 2.0,
 ) {
