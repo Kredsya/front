@@ -40,9 +40,10 @@ fun List<ScanResult>.toDisplayList(
     this
         .filter { it.level >= WifiConfig.minRssi }                       // 신호 필터링
         .map { res ->
-            val raw = rssiToDistance(res.level)
-            val ukf = ukfMap.getOrPut(res.BSSID) { WifiUkf(initial = raw) }
-            val dist = ukf.update(raw)
+            val rawRssi = res.level.toDouble()
+            val ukf = ukfMap.getOrPut(res.BSSID) { WifiUkf(initial = rawRssi) }
+            val filteredRssi = ukf.update(rawRssi)
+            val dist = ukf.update(filteredRssi)
             WifiDisplay(
                 res.level,
                 res.SSID.ifBlank { res.BSSID },
@@ -53,8 +54,8 @@ fun List<ScanResult>.toDisplayList(
         .sortedBy { it.distance }
 
 /* ---------- RSSI → 거리 ---------- */
-fun rssiToDistance(rssi: Int, walls: Int = 1): Double {
-    val totalLoss = (WifiConfig.rssiAt1m - rssi) - (walls * WifiConfig.wallLossDb)
+fun rssiToDistance(rssi: Double, walls: Int = 1): Double {
+    val totalLoss = (WifiConfig.rssiAt1m.toDouble() - rssi) - (walls * WifiConfig.wallLossDb)
     return 10.0.pow(totalLoss / (10 * WifiConfig.pathLossExponent))
 }
 
