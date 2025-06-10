@@ -159,7 +159,7 @@ fun GetAllDistancePage(
                             .clickable { navToOneDistancePage[0]() }
                     )
                     Text(
-                        text = if (upDistance != -1.0) "측정: O" else "측정: X",
+                        text = if (upDistance != -1.0) "측정: %.4f m".format(upDistance) else "측정: X",
                         modifier = Modifier,
                         color = TextColorGray
                     )
@@ -176,7 +176,7 @@ fun GetAllDistancePage(
                             .clickable { navToOneDistancePage[1]() }
                     )
                     Text(
-                        text = if (downDistance != -1.0) "측정: O" else "측정: X",
+                        text = if (downDistance != -1.0) "측정: %.4f m".format(downDistance) else "측정: X",
                         modifier = Modifier,
                         color = TextColorGray
 
@@ -202,7 +202,7 @@ fun GetAllDistancePage(
                             .clickable { navToOneDistancePage[2]() }
                     )
                     Text(
-                        text = if (leftDistance != -1.0) "측정: O" else "측정: X",
+                        text = if (leftDistance != -1.0) "측정: %.4f m".format(leftDistance) else "측정: X",
                         modifier = Modifier,
                         color = TextColorGray
                     )
@@ -219,7 +219,7 @@ fun GetAllDistancePage(
                             .clickable { navToOneDistancePage[3]() }
                     )
                     Text(
-                        text = if (frontDistance != -1.0) "측정: O" else "측정: X",
+                        text = if (frontDistance != -1.0) "측정: %.4f m".format(frontDistance) else "측정: X",
                         modifier = Modifier,
                         color = TextColorGray
 
