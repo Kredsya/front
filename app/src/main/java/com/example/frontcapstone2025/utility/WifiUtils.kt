@@ -62,55 +62,163 @@ fun rssiToDistance(rssi: Double, walls: Int = 1): Double {
 }
 
 /* -------------------------------------------------------------------------- */
-/* ---------------------------  UKF 1-차원 구현  ---------------------------- */
+/* ---------------------  RSSI Unscented Kalman Filter  --------------------- */
 /* -------------------------------------------------------------------------- */
 
 class WifiUkf(
     initial: Double,
-    private var P: Double = 1.0,
-    private val Q: Double = 0.1,
-    private val R: Double = 0.5
+    private val eta: Double = WifiConfig.pathLossExponent,
+    private val dt: Double = 1.0,
+    private val sigmaProcess: Double = 1.0,
+    private val alpha: Double = 1e-3,
+    private val kappa: Double = 0.0,
+    private val beta: Double = 2.0,
 ) {
-    private var x = initial
-    private val alpha = 1e-3
-    private val kappa = 0.0
-    private val beta = 2.0
+
+    private val n = 3
+    private val lambda = alpha * alpha * (n + kappa) - n
+    private val numSigma = 2 * n + 1
+    private val c = n + lambda
+
+    private val wM = DoubleArray(numSigma)
+    private val wC = DoubleArray(numSigma)
+
+    var x = doubleArrayOf(initial, 0.0, -40.0)
+        private set
+    var P = arrayOf(
+        doubleArrayOf(25.0, 0.0, 0.0),
+        doubleArrayOf(0.0, 4.0, 0.0),
+        doubleArrayOf(0.0, 0.0, 25.0)
+    )
+        private set
+
+    init {
+        wM[0] = lambda / c
+        wC[0] = wM[0] + 1.0 - alpha * alpha + beta
+        for (i in 1 until numSigma) {
+            wM[i] = 1.0 / (2.0 * c)
+            wC[i] = wM[i]
+        }
+    }
 
     fun update(z: Double): Double {
-        /* ---------- 예측 ---------- */
-        val xPred = x
-        val PPred = P + Q
+        val sigma = computeSigmaPoints()
+        val xPred = DoubleArray(n)
+        val sigmaPred = Array(numSigma) { DoubleArray(n) }
 
-        /* ---------- Σ-점 ---------- */
-        val n = 1
-        val lambda = alpha * alpha * (n + kappa) - n
-        val c = n + lambda
-        val sqrtTerm = kotlin.math.sqrt(c * PPred)
-        val sigma = doubleArrayOf(xPred, xPred + sqrtTerm, xPred - sqrtTerm)
-
-        val wm0 = lambda / c
-        val wc0 = wm0 + (1 - alpha * alpha + beta)
-        val wi = 1.0 / (2 * c)
-        val wm = doubleArrayOf(wm0, wi, wi)
-        val wc = doubleArrayOf(wc0, wi, wi)
-
-        var zPred = 0.0
-        for (i in sigma.indices) zPred += wm[i] * sigma[i]
-
-        var S = R
-        var Cxz = 0.0
-        for (i in sigma.indices) {
-            val dz = sigma[i] - zPred
-            val dx = sigma[i] - xPred
-            S += wc[i] * dz * dz
-            Cxz += wc[i] * dx * dz
+        for (i in 0 until numSigma) {
+            val rssi = sigma[i][0]
+            val v = sigma[i][1]
+            val pInit = sigma[i][2]
+            val expTerm = 10.0.pow((pInit - rssi) / (10.0 * eta))
+            val rssiPrime = rssi - 10.0 * eta * v * expTerm * dt
+            sigmaPred[i][0] = rssiPrime
+            sigmaPred[i][1] = v
+            sigmaPred[i][2] = pInit
+            for (j in 0 until n) xPred[j] += wM[i] * sigmaPred[i][j]
         }
 
-        val K = Cxz / S
-        x = xPred + K * (z - zPred)
-        P = PPred - K * S * K
+        val Py = Array(n) { DoubleArray(n) }
+        for (i in 0 until numSigma) {
+            val dx = diff(sigmaPred[i], xPred)
+            addOuterProduct(Py, dx, dx, wC[i])
+        }
+        addMatrix(Py, processNoiseCovariance())
 
-        return x
+        x = xPred
+        P = Py
+
+        val zSigma = DoubleArray(numSigma) { sigmaPred[it][0] }
+        var zPred = 0.0
+        for (i in 0 until numSigma) zPred += wM[i] * zSigma[i]
+
+        var Pzz = 0.0
+        for (i in 0 until numSigma) {
+            val dz = zSigma[i] - zPred
+            Pzz += wC[i] * dz * dz
+        }
+        val R = measurementNoise(z)
+        Pzz += R
+
+        val Pyz = DoubleArray(n)
+        for (i in 0 until numSigma) {
+            val dx = diff(sigmaPred[i], xPred)
+            val dz = zSigma[i] - zPred
+            for (j in 0 until n) Pyz[j] += wC[i] * dx[j] * dz
+        }
+
+        val K = DoubleArray(n) { Pyz[it] / Pzz }
+
+        val residual = z - zPred
+        for (i in 0 until n) x[i] += K[i] * residual
+        for (i in 0 until n) {
+            for (j in 0 until n) {
+                P[i][j] -= K[i] * Pzz * K[j]
+            }
+        }
+        return x[0]
+    }
+
+    fun estimatedDistance(): Double = 10.0.pow((x[0] - x[2]) / (10.0 * eta))
+
+    private fun computeSigmaPoints(): Array<DoubleArray> {
+        val sqrt = choleskyScaled(P, c)
+        val sigma = Array(numSigma) { DoubleArray(n) }
+        sigma[0] = x.copyOf()
+        for (i in 0 until n) {
+            for (j in 0 until n) {
+                sigma[1 + i][j] = x[j] + sqrt[j][i]
+                sigma[1 + n + i][j] = x[j] - sqrt[j][i]
+            }
+        }
+        return sigma
+    }
+
+    private fun choleskyScaled(A: Array<DoubleArray>, scale: Double): Array<DoubleArray> {
+        val S = Array(n) { DoubleArray(n) }
+        for (i in 0 until n) for (j in 0 until n) S[i][j] = A[i][j] * scale
+        val L = Array(n) { DoubleArray(n) }
+        for (i in 0 until n) {
+            for (j in 0..i) {
+                var sum = S[i][j]
+                for (k in 0 until j) sum -= L[i][k] * L[j][k]
+                if (i == j) {
+                    L[i][j] = kotlin.math.sqrt(sum)
+                } else {
+                    L[i][j] = sum / L[j][j]
+                }
+            }
+        }
+        return L
+    }
+
+    private fun processNoiseCovariance(): Array<DoubleArray> {
+        val q = sigmaProcess * sigmaProcess
+        return arrayOf(
+            doubleArrayOf(q * dt * dt * dt / 3.0, q * dt * dt / 2.0, 0.0),
+            doubleArrayOf(q * dt * dt / 2.0, q * dt, 0.0),
+            doubleArrayOf(0.0, 0.0, q)
+        )
+    }
+
+    private fun measurementNoise(z: Double): Double {
+        val term = (3.0 * z + 340.0) / 70.0
+        return term * term
+    }
+
+    private fun diff(a: DoubleArray, b: DoubleArray): DoubleArray =
+        DoubleArray(n) { a[it] - b[it] }
+
+    private fun addOuterProduct(M: Array<DoubleArray>, v1: DoubleArray, v2: DoubleArray, w: Double) {
+        for (i in 0 until n) {
+            for (j in 0 until n) {
+                M[i][j] += w * v1[i] * v2[j]
+            }
+        }
+    }
+
+    private fun addMatrix(dst: Array<DoubleArray>, src: Array<DoubleArray>) {
+        for (i in 0 until n) for (j in 0 until n) dst[i][j] += src[i][j]
     }
 }
 
