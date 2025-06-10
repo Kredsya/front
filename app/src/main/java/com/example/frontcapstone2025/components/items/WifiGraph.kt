@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -22,7 +21,7 @@ import androidx.compose.ui.unit.dp
 
 data class WifiGraphPoint(
     val time: Int,
-    val rssi: Int,
+    val rssi: Double,
     val distance: Double
 )
 
@@ -37,8 +36,8 @@ fun WifiGraph(
         currentPoints.value = points
     }
     val timeMax = currentPoints.value.maxOfOrNull { it.time } ?: 0
-    val distMax = currentPoints.value.maxOfOrNull { it.distance } ?: 1.0
-    val distMin = currentPoints.value.minOfOrNull { it.distance } ?: 0.0
+    val rssiMax = currentPoints.value.maxOfOrNull { it.rssi } ?: 0.0
+    val rssiMin = currentPoints.value.minOfOrNull { it.rssi } ?: -100.0
 
     Canvas(
         modifier = modifier
@@ -78,7 +77,7 @@ fun WifiGraph(
             }
             val ySteps = 4
             for (i in 0..ySteps) {
-                val value = distMax - (distMax - distMin) * i / ySteps
+                val value = rssiMax - (rssiMax - rssiMin) * i / ySteps
                 val y = padding + (i / ySteps.toFloat()) * height
                 drawText(String.format("%.1f", value), padding - 48f, y + 8f, textPaint)
             }
@@ -88,7 +87,7 @@ fun WifiGraph(
             val path = Path()
             currentPoints.value.forEachIndexed { index, point ->
                 val x = padding + (point.time.toFloat() / timeMax.coerceAtLeast(1)) * width
-                val y = padding + height - ((point.distance - distMin).toFloat() / (distMax - distMin).toFloat()) * height
+                val y = padding + height - ((point.rssi - rssiMin).toFloat() / (rssiMax - rssiMin).toFloat()) * height
                 if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
                 drawCircle(color = Color.Red, radius = 4.dp.toPx(), center = Offset(x, y))
             }

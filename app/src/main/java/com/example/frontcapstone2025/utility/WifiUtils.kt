@@ -25,7 +25,7 @@ import kotlin.math.pow
 /* -------------------------------------------------------------------------- */
 
 data class WifiDisplay(
-    val rssi: Int,
+    val rssi: Double,
     val ssid: String,
     val bssid: String,
     val distance: Double
@@ -43,9 +43,9 @@ fun List<ScanResult>.toDisplayList(
             val rawRssi = res.level.toDouble()
             val ukf = ukfMap.getOrPut(res.BSSID) { WifiUkf(initial = rawRssi) }
             val filteredRssi = ukf.update(rawRssi)
-            val dist = ukf.update(filteredRssi)
+            val dist = rssiToDistance(filteredRssi)
             WifiDisplay(
-                res.level,
+                filteredRssi,
                 res.SSID.ifBlank { res.BSSID },
                 res.BSSID,
                 dist
